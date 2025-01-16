@@ -1,9 +1,3 @@
-CREATE TABLE IF NOT EXISTS players (
-    player_id VARCHAR(50) PRIMARY KEY,
-    name VARCHAR(100) NOT NULL
-);
-
-
 CREATE TABLE IF NOT EXISTS game_logs (
     id SERIAL PRIMARY KEY,
     date DATE NOT NULL,
@@ -27,11 +21,11 @@ CREATE TABLE IF NOT EXISTS game_logs (
     turnovers INTEGER NOT NULL,
     personal_fouls INTEGER NOT NULL,
     points_scored INTEGER NOT NULL,
-    game_score DECIMAL(4,1) NOT NULL,
+    game_score DECIMAL(10,1) NOT NULL,
     plus_minus INTEGER NOT NULL,
-    player_id VARCHAR NOT NULL REFERENCES players(player_id),
+    player_id VARCHAR NOT NULL,
     player_name VARCHAR NOT NULL,
     is_home BOOLEAN NOT NULL,
     is_win BOOLEAN NOT NULL,
-    minutes_played DECIMAL(4,3) NOT NULL
+    minutes_played DECIMAL(10,3) NOT NULL
 );

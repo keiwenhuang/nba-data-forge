@@ -70,7 +70,7 @@ def load_csv_data(db_url, csv_file, table_name):
     try:
         engine = create_engine(db_url)
         df = pd.read_csv(csv_file)
-        df.to_sql(table_name, engine, if_exists="replace", index=False)
+        df.to_sql(table_name, engine, if_exists="append", index=False)
         print(f"Table {table_name} created successfully!")
 
     except Exception as e:
@@ -80,7 +80,7 @@ def load_csv_data(db_url, csv_file, table_name):
 
 def main():
     CONFIG_FILE = "./config/database.ini"
-    SCHEMA_FILE = "./scripts/sql/schema.sql"
+    SCHEMA_FILE = "./database/sql/schema.sql"
     CSV_FILE = "./data/processed_game_logs.csv"
 
     db_params = get_db_config(config_file=CONFIG_FILE)

@@ -24,6 +24,13 @@ def explore_data():
         print(sorted(unique_values[~pd.isna(unique_values)]))
         print("-" * 75)
 
+    # Print longest value in each column
+    print("\nLongest values in each column:")
+    for column in game_logs.columns:
+        max_len_value = max(game_logs[column].astype(str), key=len)
+        print(f"{column}: {max_len_value} (length: {len(str(max_len_value))})")
+    print("-" * 75)
+
 
 def clean_field(item) -> str | None:
     """Clean field by removing prefix and replacing underscores with spaces for team names.
