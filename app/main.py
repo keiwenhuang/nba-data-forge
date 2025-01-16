@@ -1,6 +1,10 @@
 from fastapi import FastAPI
 
-app = FastAPI(title="NBA Data Forge", version="0.0.1")
+app = FastAPI(
+    title="NBA Data Forge",
+    version="1.0.0",
+    description="API for accessing NBA game statistics and analytics",
+)
 
 
 @app.get("/")
@@ -8,6 +12,9 @@ def root():
     return {"Hello": "World"}
 
 
-@app.get("/player/{str:player_id}")
-def get_player(player_id):
-    return
+@app.get("/health")
+async def health_check():
+    """
+    Health check endpoint for monitoring.
+    """
+    return {"status": "healthy"}

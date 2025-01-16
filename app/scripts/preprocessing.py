@@ -63,8 +63,13 @@ def preprocess_data():
     for col in columns:
         df[col] = df[col].apply(clean_field)
 
+    # Filter for inactive players and print their details
+    inactive_players = df[~df["active"]]
+    print("\nInactive players:")
+    print(inactive_players[["player_name", "team", "date"]].head())
+
     # save the processed data
-    df.to_csv("./data/processed_game_logs.csv", index=False)
+    # df.to_csv("./data/processed_game_logs.csv", index=False)
 
     print(df.head())
     print(df.dtypes)

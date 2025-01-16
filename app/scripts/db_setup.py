@@ -1,8 +1,13 @@
+import sys
 from configparser import ConfigParser
+from pathlib import Path
 
 import pandas as pd
 import psycopg2
 from sqlalchemy import create_engine
+
+sys.path.append(str(Path(__file__).parent.parent.parent))
+from app.core.config import config
 
 
 def get_db_config(config_file="./config/database.ini", section="postgresql"):
@@ -79,7 +84,7 @@ def load_csv_data(db_url, csv_file, table_name):
 
 
 def main():
-    CONFIG_FILE = "./config/database.ini"
+    CONFIG_FILE = "config.ini"
     SCHEMA_FILE = "./database/sql/schema.sql"
     CSV_FILE = "./data/processed_game_logs.csv"
 
@@ -88,7 +93,7 @@ def main():
     create_database(db_params)
     execute_schema(db_params, SCHEMA_FILE)
 
-    db_url = f"postgresql://{db_params['user']}:{db_params['password']}@{db_params['host']}:{db_params['port']}/{db_params['database']}"
+    db_url = config.get_database_url()
     load_csv_data(db_url, CSV_FILE, "game_logs")
 
 
