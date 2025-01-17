@@ -1,0 +1,12 @@
+[project]
+name = "nba-data-forge"
+version = "0.1.0"
+description = "NBA analytics platform focusing on serving NBA statistics and insights"
+readme = "README.md"
+requires-python = ">=3.12"
+
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]
+namespaces = false
