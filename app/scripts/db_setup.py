@@ -1,12 +1,9 @@
-import sys
 from configparser import ConfigParser
-from pathlib import Path
 
 import pandas as pd
 import psycopg2
 from sqlalchemy import create_engine
 
-sys.path.append(str(Path(__file__).parent.parent.parent))
 from app.core.config import config
 
 

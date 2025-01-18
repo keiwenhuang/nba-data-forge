@@ -31,6 +31,13 @@ def explore_data():
         print(f"{column}: {max_len_value} (length: {len(str(max_len_value))})")
     print("-" * 75)
 
+    # Print date range
+    date_range = pd.to_datetime(game_logs["date"])
+    print("\nDate range:")
+    print(f"Earliest date: {date_range.min()}")
+    print(f"Latest date: {date_range.max()}")
+    print("-" * 75)
+
 
 def clean_field(item) -> str | None:
     """Clean field by removing prefix and replacing underscores with spaces for team names.
@@ -77,4 +84,4 @@ def preprocess_data():
 
 if __name__ == "__main__":
     explore_data()
-    preprocess_data()
+    # preprocess_data()
