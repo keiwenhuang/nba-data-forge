@@ -6,11 +6,14 @@ import pandas as pd
 
 from data_engineering.extractors.game_log_extractor import GameLogExtractor
 from data_engineering.extractors.player_extractor import PlayerExtractor
+from data_engineering.utils.path import get_project_root
 
 
 def ensure_data_directories():
-    Path("data/raw").mkdir(parents=True, exist_ok=True)
-    Path("data/processed").mkdir(parents=True, exist_ok=True)
+    root = get_project_root()
+    (root / "data/raw").mkdir(parents=True, exist_ok=True)
+    (root / "data/processed").mkdir(parents=True, exist_ok=True)
+    (root / "data/checkpoints").mkdir(parents=True, exist_ok=True)
 
 
 def collect_player_data():
@@ -20,12 +23,13 @@ def collect_player_data():
 
 
 def collect_game_logs(from_season: int, to_season: int = None):
-    players = pd.read_csv("data/raw/players.csv")
-    game_log_extractor = GameLogExtractor()
+    root = get_project_root()
+    players = pd.read_csv(root / "data/raw/players.csv")
+    game_log_extractor = GameLogExtractor(checkpoint_dir=root / "data/checkpoints")
 
     for season in range(from_season, to_season + 1):
         df = game_log_extractor.extract(players, season=season)
-        df.to_csv(f"data/raw/game_logs_{season}.csv", index=False)
+        df.to_csv(root / f"data/raw/game_logs_{season}.csv", index=False)
 
 
 if __name__ == "__main__":

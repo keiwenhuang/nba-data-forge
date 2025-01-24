@@ -8,11 +8,17 @@ from random import uniform
 import pandas as pd
 import requests
 
+from data_engineering.utils.path import get_project_root
+
 
 class BaseExtractor(ABC):
-    def __init__(self, base_url="https://www.basketball-reference.com", log_dir="logs"):
+    def __init__(self, base_url="https://www.basketball-reference.com", log_dir=None):
         self.base_url = base_url
-        self.log_dir = Path(log_dir)
+        if log_dir is None:
+            root = get_project_root()
+            self.log_dir = root / "logs"
+        else:
+            self.log_dir = log_dir
         self.log_dir.mkdir(parents=True, exist_ok=True)
         self.logger = self._setup_logger()
 

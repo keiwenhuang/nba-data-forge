@@ -15,10 +15,11 @@ DEFAULT_TO_SEASON = 2024
 
 
 class GameLogExtractor(BaseExtractor):
-    def __init__(self, max_retries: int = 3):
+    def __init__(self, max_retries: int = 3, checkpoint_dir=None):
         super().__init__()
         self.max_retries = max_retries
-        self.checkpoint_manager = CheckpointManager()
+        self.checkpoint_dir = checkpoint_dir
+        self.checkpoint_manager = CheckpointManager(checkpoint_dir)
 
     def _get_game_logs(self, player_id: str, season: int):
         for attempt in range(self.max_retries):
