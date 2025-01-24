@@ -1,36 +1,103 @@
 # NBA Data Forge
 
-A FastAPI-powered analytics platform demonstrating backend development with planned data engineering capabilities through NBA statistics analysis.
+A portfolio project showcasing data engineering and backend development through NBA statistics analysis.
 
 ## Project Overview
+Starting from an existing NBA analytics project, NBA Data Forge evolved into a comprehensive platform demonstrating:
 
-NBA Data Forge is a portfolio project that showcases the development of a robust API for NBA statistics analysis. The project currently focuses on:
-- Backend development with FastAPI and SQLAlchemy
-- Web scraping and data collection
-- RESTful API design and implementation
-- Database modeling with PostgreSQL
-- Statistics and analytics processing
+- Historical NBA data collection
+- Automated data engineering pipeline
+- RESTful API with analytics capabilities
+- Robust error handling and recovery systems
 
-### Data Processing & Structure
+### Data Sources
+- [Basketball Reference](https://www.basketball-reference.com/) - Web scraping for player data
+- [basketball_reference_web_scraper](https://jaebradley.github.io/basketball_reference_web_scraper/) - Python client for Basketball Reference data
 
-The project uses processed NBA game statistics originally sourced from [Basketball Reference](https://www.basketball-reference.com/). The data was collected through web scraping and underwent several processing steps to create a clean, analyzed dataset suitable for the API.
+## Project Timeline & Status
+### Phase 1: API Development
+- Utilized existing NBA dataset
+- Implemented basic FastAPI endpoints
+- Created database models and schemas
+- Set up initial analytics features
 
-#### Dataset Features
-The processed dataset includes comprehensive game statistics with 28 fields per entry:
+### Phase 2: Data Engineering (Current)
+- Implemented web scraping infrastructure
+- Built data collection pipeline with recovery system
+- Currently collecting historical data (past 20 seasons)
+- Developed checkpoint-based recovery mechanism
+
+### Phase 3: Planned
+- Complete historical data collection
+- Implement incremental data updates
+- Enhance API analytics capabilities
+- Add advanced statistical analysis
+
+## Technical Implementation
+### Data Structure
+#### Player Data
+```
+player_id,name,year_min,year_max,position,height,weight,birth_date,college,is_active
+```
+Note: `is_active` status is determined during data collection from Basketball Reference
+
+#### GameLogs
+```
+date,team,location,opponent,outcome,seconds_played,points_scored,game_score,plus_minus,player_id
+```
+Additional fields:
+- `player_id` and `name` are added during data collection
+- Preprocessing adds: `is_home`, `is_win`, `minutes_played`
+
+Dataset includes 28 fields per game entry:
 - Game metadata (date, location, teams)
-- Player statistics (points, rebounds, assists, etc.)
+- Player statistics (points, rebounds, assists)
 - Advanced metrics (game score, plus/minus)
-- Derived fields (is_home, is_win, minutes_played)
+- Enriched data (player identification, derived statistics)
 
-The complete data schema can be found in `game_logs.sql`, which defines the structure of:
-- Player identification and game participation
-- Standard box score statistics
-- Advanced performance metrics
-- Game context and outcomes
+### Technical Stack
+- **Backend Framework**: FastAPI
+- **Database**: PostgreSQL
+- **ORM**: SQLAlchemy
+- **Data Collection**: BeautifulSoup, basketball_reference_web_scraper
+- **Data Processing**: Pandas
+- **Schema Validation**: Pydantic
+- **Development Tools**: pytest, Git
 
-Note: The processed dataset is not included in this repository. The database schema and processing scripts are provided for reference.
+### Project Structure
+```
+nba_data_forge/
+├── app/                            # FastAPI application
+│   ├── api/                        # API endpoints
+│   ├── core/                       # Core configurations
+│   ├── models/                     # SQLAlchemy models
+│   ├── schemas/                    # Pydantic schemas
+│   └── services/                   # Business logic
+├── data_engineering/               # Data collection
+│   ├── extractors/                 # Web scraping
+│   └── utils/                      # Shared utilities
+├── data/                           # Data storage
+│   ├── raw/                        # Collected data
+│   ├── processed/                  # Transformed data
+│   └── checkpoints/                # Recovery points
+└── logs/                           # Application logs
+```
 
-## Current Features
+## Features
+### Data Collection
+```
+# Collect player data
+python data_collection.py --players
+
+# Collect game logs for specific seasons
+python data_collection.py --game-logs --from-season 2019 --to-season 2022
+```
+Key features:
+- Web scraping with rate limiting
+- Season-based collection
+- Checkpoint recovery system
+- Rotating logs (10MB, 5 backups)
+- Data validation
 
 ### API Endpoints
 - `/api/v1/players` - Player statistics with filtering capabilities
@@ -38,177 +105,57 @@ Note: The processed dataset is not included in this repository. The database sch
 - `/api/v1/game_logs` - Detailed game-by-game data
 - `/api/v1/boxscores` - Daily box score summaries
 
-### Analytics Capabilities
-- Player performance metrics
-- Team statistics aggregation
-- Game-by-game analysis
-- Flexible date range and season filtering
-
-## Technical Stack
-
-### Current Implementation
-- **Backend Framework**: FastAPI
-- **Database**: PostgreSQL
-- **ORM**: SQLAlchemy
-- **Data Collection**: Web scraping (Beautiful Soup/Selenium)
-- **Data Processing**: Pandas
-- **Schema Validation**: Pydantic
-- **Development Tools**: pytest, Git
-
-### Planned Additions
-- **ETL Framework**: Apache Airflow
-- **Data Validation**: Great Expectations
-- **Data Processing**: Additional pandas and NumPy integrations
-- **Monitoring**: Custom metrics and alerting
-
-## Project Structure
-```
-├── alembic/                  # Database migrations
-├── app/
-│   ├── api/
-│   │   ├── dependencies/     # API dependencies
-│   │   │   ├── filters.py
-│   │   │   └── __init__.py
-│   │   └── v1/              # API route handlers
-│   │       ├── boxscores.py
-│   │       ├── game_logs.py
-│   │       ├── players.py
-│   │       ├── teams.py
-│   │       └── __init__.py
-│   ├── core/                # Core configurations
-│   │   ├── config.py
-│   │   ├── database.py
-│   │   └── __init__.py
-│   ├── models/              # SQLAlchemy models
-│   │   ├── game_log.py
-│   │   └── __init__.py
-│   ├── schemas/             # Pydantic schemas
-│   │   ├── boxscore.py
-│   │   ├── game_log.py
-│   │   ├── Player_name_id.py
-│   │   ├── team_names.py
-│   │   └── __init__.py
-│   ├── scripts/             # Utility scripts
-│   │   ├── db_setup.py
-│   │   ├── preprocessing.py
-│   │   └── __init__.py
-│   ├── services/           # Business logic
-│   │   ├── boxscore_service.py
-│   │   └── __init__.py
-│   └── test/              # Test directory
-│       └── __init__.py
-├── database/             # Database definitions
-│   └── game_logs.sql
-├── .gitignore
-├── alembic.ini         # Alembic configuration
-└── config.ini          # Project configuration
-```
-
-## Key Components
-
-### Data Models
-- Comprehensive game log tracking with 28 statistical fields
-- Player and team identification
-- Game outcome and location tracking
-- Performance metrics including plus/minus and game score
-
-### API Features
+Features:
 - Season-based filtering
 - Date range queries
 - Last N games analysis
-- Player and team statistics aggregation
+- Team statistics aggregation
 - Daily box score compilation
 
-## Development Status
-
-### Currently Implemented
-- Core database schema
-- Basic API routing structure
-- Simple data preprocessing
-- Player and team statistics endpoints
-- Box score generation service
-- Basic filtering capabilities
-
-### Planned Features
-
-#### Advanced Analytics
-- Enhanced player metrics
-- Team performance analysis
-- Prediction modeling
-- Historical trend analysis
-
-#### Data Engineering Pipeline
-- Apache Airflow integration for ETL workflows
-- Automated data validation and cleaning
-- Data quality monitoring
-- Error handling and recovery procedures
-- Historical data processing
-
-#### Performance Optimizations
-- Query optimization
-- Caching implementation
-- Database indexing improvements
-- Response compression
-
 ## Development Setup
-
-This project is currently set up for development and demonstration purposes. To explore or work with this codebase:
-
 ### Prerequisites
-- Python 3.8+
-- PostgreSQL
-- FastAPI
-- SQLAlchemy
-- Pydantic
-- pandas
+- Python 3.12+
+- PostgresSQL
 
 ### Configuration
-The project requires some configuration to run:
-
-1. Database Configuration
-   - Create a PostgreSQL database
-   - Create a `config.ini` file in the project root with the following structure:
-     ```ini
-     [postgresql]
-     host=localhost
-     port=5432
-     database=your_database_name
-     user=your_username
-     password=your_password
-     ```
-
-2. Dependencies
-   The project requires the following main Python packages:
-   ```
-   fastapi
-   uvicorn
-   sqlalchemy
-   psycopg2-binary
-   pandas
-   pydantic
-   ```
-
-For a complete setup guide or questions about running the project, please open an issue on GitHub.
+1. Create PostgreSQL database
+2. Configure `config.ini`:
+```
+[postgresql]
+host=localhost
+port=5432
+database=your_database_name
+user=your_username
+password=your_password
+```
+3. Install dependencies:
+```
+pip install -r requirements.txt
+```
 
 ## API Documentation
-
 Once running, view the interactive API documentation at:
 - Swagger UI: `http://localhost:8000/docs`
 - ReDoc: `http://localhost:8000/redoc`
 
-## Portfolio Notes
+## Next Steps
+### Short Term
+- Complete historical data collection
+- Implement incremental periodically updates
+- Enhance data validation and quality checks
 
-This project demonstrates proficiency in:
-- Modern Python backend development
-- RESTful API design and implementation
-- Database modeling and optimization
-- Clean code practices and project structure
-- Documentation and maintenance considerations
+### Medium Term
+- Expand API analytics capabilities
+- Add advanced statistical analysis
+- Implement caching and query optimization
+- Performance monitoring and tuning
 
-The planned data engineering enhancements will showcase additional skills in:
+## Skills Demonstrated
 - ETL pipeline development
-- Data workflow automation
-- Data quality management
-- System scaling and optimization
+- RESTful API design
+- Database modeling
+- Error handling and recovery
+- Clean code practices
+- Project organization
 
-For questions or discussions about this portfolio project, feel free to reach out through GitHub issues.
+For questions about this portfolio project, please open an issue on GitHub.
