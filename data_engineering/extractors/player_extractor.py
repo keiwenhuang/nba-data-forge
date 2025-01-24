@@ -84,15 +84,3 @@ class PlayerExtractor(BaseExtractor):
 
         except Exception as e:
             self.logger.info(f"Error parsing {player}: {str(e)}")
-
-
-if __name__ == "__main__":
-    extractor = PlayerExtractor()
-
-    # Test web scraping
-    try:
-        print("Running test..")
-        res = extractor.extract()
-        print("Successfully got webpage:", res)
-    except Exception as e:
-        print("Error getting webpage:", e)
