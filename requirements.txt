@@ -113,7 +113,7 @@ methodtools==0.4.7
 more-itertools==10.6.0
 msgpack==1.1.0
 multidict==6.1.0
--e git+https://github.com/keiwenhuang/nba-data-forge.git@9251d2e661a77f67aba28ffdbf73fe2fe30a34d0#egg=nba_data_forge
+-e git+https://github.com/keiwenhuang/nba-data-forge.git@80f84aebed809f72dc60b45b01ed2c9ae675958e#egg=nba_data_forge
 nest-asyncio==1.6.0
 numpy==2.2.1
 opentelemetry-api==1.29.0
@@ -202,7 +202,8 @@ virtualenv==20.29.0
 watchfiles==1.0.4
 wcwidth==0.2.13
 websockets==14.1
-Werkzeug==2.2.3
+# Pin Werkzeug < 3.0.0 for Airflow/Connexion compatibility
+werkzeug>=2.2.3,<3.0.0
 wirerope==1.0.0
 wrapt==1.17.2
 WTForms==3.2.1
