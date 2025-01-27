@@ -7,6 +7,7 @@ from random import uniform
 
 import pandas as pd
 import requests
+from utils.logger import setup_logger
 
 from data_engineering.utils.path import get_project_root
 
@@ -14,36 +15,36 @@ from data_engineering.utils.path import get_project_root
 class BaseExtractor(ABC):
     def __init__(self, base_url="https://www.basketball-reference.com", log_dir=None):
         self.base_url = base_url
+
         if log_dir is None:
             root = get_project_root()
             self.log_dir = root / "logs"
         else:
             self.log_dir = log_dir
-        self.log_dir.mkdir(parents=True, exist_ok=True)
-        self.logger = self._setup_logger()
+        self.logger = setup_logger(name=self.__class__.__name__, log_dir=log_dir)
 
-    def _setup_logger(self) -> logging.Logger:
-        logging.basicConfig(
-            level=logging.INFO,
-            format="%(asctime)s | %(name)-12s | %(levelname)-8s | %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S",
-        )
+    # def _setup_logger(self) -> logging.Logger:
+    #     logging.basicConfig(
+    #         level=logging.INFO,
+    #         format="%(asctime)s | %(name)-12s | %(levelname)-8s | %(message)s",
+    #         datefmt="%Y-%m-%d %H:%M:%S",
+    #     )
 
-        logger = logging.getLogger(self.__class__.__name__)
+    #     logger = logging.getLogger(self.__class__.__name__)
 
-        log_file = self.log_dir / f"{self.__class__.__name__}.log"
-        file_handler = RotatingFileHandler(
-            log_file, maxBytes=10 * 1024 * 1024, backupCount=5, encoding="utf-8"
-        )
-        file_handler.setFormatter(
-            logging.Formatter(
-                "%(asctime)s | %(name)-12s | %(levelname)-8s | %(message)s",
-                datefmt="%Y-%m-%d %H:%M:%S",
-            )
-        )
-        logger.addHandler(file_handler)
+    #     log_file = self.log_dir / f"{self.__class__.__name__}.log"
+    #     file_handler = RotatingFileHandler(
+    #         log_file, maxBytes=10 * 1024 * 1024, backupCount=5, encoding="utf-8"
+    #     )
+    #     file_handler.setFormatter(
+    #         logging.Formatter(
+    #             "%(asctime)s | %(name)-12s | %(levelname)-8s | %(message)s",
+    #             datefmt="%Y-%m-%d %H:%M:%S",
+    #         )
+    #     )
+    #     logger.addHandler(file_handler)
 
-        return logger
+    #     return logger
 
     def _handle_rate_limit(self, response, retry_after=60):
         if response.status_code == 429:
