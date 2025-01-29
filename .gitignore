@@ -8,6 +8,7 @@ __pycache__/
 config.ini
 *.egg-info
 /logs
+.pytest_cache
 
 # Airflow
 airflow/logs/

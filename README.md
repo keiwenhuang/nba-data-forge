@@ -76,6 +76,8 @@ nba_data_forge/
 ├── data_engineering/               # Data collection
 │   ├── extractors/                 # Web scraping
 │   └── utils/                      # Shared utilities
+├── airflow/ 
+│   ├── dags/                       
 ├── data/                           # Data storage
 │   ├── raw/                        # Collected data
 │   ├── processed/                  # Transformed data

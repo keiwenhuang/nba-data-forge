@@ -108,6 +108,7 @@ class GameLogTransformer:
             )
             result["is_home"] = result["location"].isin(["Location.HOME", "HOME"])
             result["is_win"] = result["outcome"].isin(["Outcome.WIN", "WIN"])
+            result["minutes_played"] = round(df["seconds_played"] / 60, 3)
 
         except Exception as e:
             self.logger.error(f"Error transforming: {str(e)}")

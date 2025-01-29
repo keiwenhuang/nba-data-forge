@@ -1,9 +1,12 @@
 import os
 from configparser import ConfigParser
+from data_engineering.utils.path import get_project_root
+
+ROOT = get_project_root()
 
 
 class Config:
-    def __init__(self, config_file="../config.ini"):
+    def __init__(self, config_file=f"{ROOT}/config.ini"):
         self.config = ConfigParser()
         self.config_file = config_file
         self._load_config()
