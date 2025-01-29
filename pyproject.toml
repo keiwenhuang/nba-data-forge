@@ -11,6 +11,6 @@ license = {text = "MIT"}
 
 
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["app*", "data_engineering*"]
+where = ["src"]
+include = ["nba_pipeline*"]
 namespaces = false
