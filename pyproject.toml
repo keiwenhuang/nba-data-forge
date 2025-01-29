@@ -12,5 +12,5 @@ license = {text = "MIT"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["nba_pipeline*"]
+include = ["nba_data_forge*"]
 namespaces = false

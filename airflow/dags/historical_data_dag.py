@@ -7,10 +7,9 @@ from airflow import DAG
 from airflow.operators.empty import EmptyOperator
 from airflow.operators.python import PythonOperator
 from airflow.utils.task_group import TaskGroup
-
-# from data_engineering.loaders.database import DatabaseLoader
-# from data_engineering.transformers.game_log_transformer import GameLogTransformer
-# from data_engineering.utils.path import get_project_root
+from nba_data_forge.etl.loaders.database import DatabaseLoader
+from nba_data_forge.etl.transformers.game_log_transformer import GameLogTransformer
+from nba_data_forge.etl.utils.path import get_project_root
 
 # ROOT = get_project_root()
 

@@ -1,10 +1,10 @@
 from pathlib import Path
 
 import pandas as pd
-from etl.utils.path import get_project_root
 from sqlalchemy import create_engine, text
 
-from src.nba_pipeline.api.core.config import config
+from nba_data_forge.api.core import config
+from nba_data_forge.etl.utils.path import get_project_root
 
 
 class DatabaseLoader:
