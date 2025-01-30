@@ -7,8 +7,9 @@ from random import uniform
 
 import pandas as pd
 import requests
-from etl.utils.path import get_project_root
-from utils.logger import setup_logger
+
+from nba_data_forge.etl.utils.logger import setup_logger
+from nba_data_forge.etl.utils.path import get_project_root
 
 
 class BaseExtractor(ABC):

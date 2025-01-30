@@ -4,9 +4,9 @@ from pathlib import Path
 
 import pandas as pd
 
-from data_engineering.extractors.game_log_extractor import GameLogExtractor
-from data_engineering.extractors.player_extractor import PlayerExtractor
-from data_engineering.utils.path import get_project_root
+from nba_data_forge.etl.extractors.game_log_extractor import GameLogExtractor
+from nba_data_forge.etl.extractors.player_extractor import PlayerExtractor
+from nba_data_forge.etl.utils.path import get_project_root
 
 
 def ensure_data_directories():

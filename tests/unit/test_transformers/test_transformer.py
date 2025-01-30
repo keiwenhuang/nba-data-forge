@@ -1,8 +1,8 @@
 import pandas as pd
 import pytest
 
-from data_engineering.transformers.game_log_transformer import GameLogTransformer
-from data_engineering.utils.path import get_project_root
+from nba_data_forge.etl.transformers.game_log_transformer import GameLogTransformer
+from nba_data_forge.etl.utils.path import get_project_root
 
 ROOT = get_project_root()
 

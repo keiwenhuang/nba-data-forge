@@ -67,22 +67,27 @@ Dataset includes 28 fields per game entry:
 ### Project Structure
 ```
 nba_data_forge/
-├── app/                            # FastAPI application
-│   ├── api/                        # API endpoints
-│   ├── core/                       # Core configurations
-│   ├── models/                     # SQLAlchemy models
-│   ├── schemas/                    # Pydantic schemas
-│   └── services/                   # Business logic
-├── data_engineering/               # Data collection
-│   ├── extractors/                 # Web scraping
-│   └── utils/                      # Shared utilities
+├── src/                          
+│   └── nba_data_forge/             
+│       ├── api/                    
+│       │   ├── core/               
+│       │   ├── dependencies/               
+│       │   ├── models/                     
+│       │   ├── schemas/                     
+│       │   ├── scripts/                    
+│       │   ├── services/                   
+│       │   ├── v1/                
+│       └── etl/            
+│           ├── extractors/          
+│           ├── loaders/        
+│           ├── transformers/               
+│           └── utils/                      
 ├── airflow/ 
-│   ├── dags/                       
-├── data/                           # Data storage
-│   ├── raw/                        # Collected data
-│   ├── processed/                  # Transformed data
-│   └── checkpoints/                # Recovery points
-└── logs/                           # Application logs
+│   └── dags/                  
+└── data/                           # Data storage
+    ├── raw/                        # Collected data
+    ├── processed/                  # Transformed data
+    └── checkpoints/                # Recovery points
 ```
 
 ## Features
