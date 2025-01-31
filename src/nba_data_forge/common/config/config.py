@@ -4,7 +4,6 @@ from pathlib import Path
 from nba_data_forge.common.utils.path import get_project_root
 
 ROOT = get_project_root()
-print(ROOT)
 
 
 class Config:
