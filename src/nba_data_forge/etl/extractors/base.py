@@ -1,15 +1,12 @@
-import logging
 import time
 from abc import ABC, abstractmethod
-from logging.handlers import RotatingFileHandler
-from pathlib import Path
 from random import uniform
 
 import pandas as pd
 import requests
 
-from nba_data_forge.etl.utils.logger import setup_logger
-from nba_data_forge.etl.utils.path import get_project_root
+from nba_data_forge.common.utils.logger import setup_logger
+from nba_data_forge.common.utils.path import get_project_root
 
 
 class BaseExtractor(ABC):

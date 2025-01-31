@@ -3,8 +3,8 @@ from typing import List
 
 from sqlalchemy.orm import Session
 
-from nba_pipeline.api.models.game_log import GameLog as GameLogModel
-from nba_pipeline.api.schemas.boxscore import (
+from nba_data_forge.api.models.game_log import GameLog as GameLogModel
+from nba_data_forge.api.schemas.boxscore import (
     DailyBoxScores,
     GameBoxScore,
     PlayerBoxScore,

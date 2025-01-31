@@ -1,8 +1,7 @@
-import os
 from configparser import ConfigParser
 from pathlib import Path
 
-from nba_data_forge.etl.utils.path import get_project_root
+from nba_data_forge.common.utils.path import get_project_root
 
 ROOT = get_project_root()
 print(ROOT)

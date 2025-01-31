@@ -3,9 +3,9 @@ from datetime import date
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from nba_pipeline.api.core.database import get_session
-from nba_pipeline.api.schemas.boxscore import DailyBoxScores as DailyBoxScoresSchema
-from nba_pipeline.api.services.boxscore_service import BoxScoreService
+from nba_data_forge.api.schemas.boxscore import DailyBoxScores as DailyBoxScoresSchema
+from nba_data_forge.api.services.boxscore_service import BoxScoreService
+from nba_data_forge.common.db.database import get_session
 
 router = APIRouter()
 

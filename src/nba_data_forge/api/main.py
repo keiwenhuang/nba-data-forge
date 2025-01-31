@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from nba_pipeline.api.v1 import v1_router
+from nba_data_forge.api.v1 import v1_router
 
 app = FastAPI(
     title="NBA Data Forge",

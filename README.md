@@ -70,24 +70,22 @@ nba_data_forge/
 ├── src/                          
 │   └── nba_data_forge/             
 │       ├── api/                    
-│       │   ├── core/               
-│       │   ├── dependencies/               
-│       │   ├── models/                     
-│       │   ├── schemas/                     
-│       │   ├── scripts/                    
-│       │   ├── services/                   
-│       │   ├── v1/                
-│       └── etl/            
-│           ├── extractors/          
-│           ├── loaders/        
-│           ├── transformers/               
-│           └── utils/                      
-├── airflow/ 
-│   └── dags/                  
-└── data/                           # Data storage
-    ├── raw/                        # Collected data
-    ├── processed/                  # Transformed data
-    └── checkpoints/                # Recovery points
+│       │   ├── dependencies/       # FastAPI dependencies
+│       │   ├── models/             # SQLAlchemy models             
+│       │   ├── schemas/            # Pydantic schemas 
+│       │   ├── services/           # Business logic
+│       │   └── v1/                 # API v1 endpoints
+│       ├── common/                 # Shared code
+│       │   ├── config/             # Configuration management
+│       │   ├── db/                 # Database utilities
+│       │   └── utils/              # Shared utilities
+│       └── etl/                    # ETL pipeline
+│           ├── extractors/         # Data collection
+│           ├── loaders/            # Database loading
+│           └── transformers/       # Data processing
+├── tests/                          # Integration tests
+└── airflow/                        # Airflow configuration
+    └── dags/                       # Airflow DAG definitions
 ```
 
 ## Features

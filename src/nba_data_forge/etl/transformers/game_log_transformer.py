@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from nba_data_forge.etl.utils.logger import setup_logger
-from nba_data_forge.etl.utils.path import get_project_root
+from nba_data_forge.common.utils.logger import setup_logger
+from nba_data_forge.common.utils.path import get_project_root
 
 
 class GameLogTransformer:

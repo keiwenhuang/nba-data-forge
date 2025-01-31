@@ -3,15 +3,15 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from nba_pipeline.api.core.database import get_session
-from nba_pipeline.api.dependencies.filters import CommonQueryParams
-from nba_pipeline.api.dependencies.query_utils import (
+from nba_data_forge.api.dependencies.filters import CommonQueryParams
+from nba_data_forge.api.dependencies.query_utils import (
     apply_common_filters,
     check_record_exists,
 )
-from nba_pipeline.api.models.game_log import GameLog as GameLogModel
-from nba_pipeline.api.schemas.game_log import GameLog as GameLogSchema
-from nba_pipeline.api.schemas.Player_name_id import PlayerNameID
+from nba_data_forge.api.models.game_log import GameLog as GameLogModel
+from nba_data_forge.api.schemas.game_log import GameLog as GameLogSchema
+from nba_data_forge.api.schemas.Player_name_id import PlayerNameID
+from nba_data_forge.common.db.database import get_session
 
 router = APIRouter()
 

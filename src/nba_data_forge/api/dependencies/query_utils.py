@@ -1,7 +1,7 @@
 from datetime import date
 
-from nba_pipeline.api.dependencies.filters import CommonQueryParams
-from nba_pipeline.api.models.game_log import GameLog as GameLogModel
+from nba_data_forge.api.dependencies.filters import CommonQueryParams
+from nba_data_forge.api.models.game_log import GameLog as GameLogModel
 
 
 def get_season_date_range(season: int):
