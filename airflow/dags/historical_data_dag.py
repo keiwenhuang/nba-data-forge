@@ -6,18 +6,11 @@ import pandas as pd
 from airflow import DAG
 from airflow.operators.empty import EmptyOperator
 from airflow.operators.python import PythonOperator
+from airflow.utils.log.logging_mixin import LoggingMixin
 from airflow.utils.task_group import TaskGroup
+from nba_data_forge.etl.config.paths import paths
 from nba_data_forge.etl.loaders.database import DatabaseLoader
 from nba_data_forge.etl.transformers.game_log_transformer import GameLogTransformer
-from nba_data_forge.etl.utils.path import get_project_root
-
-# Instead of using ROOT, use Docker paths
-DATA_DIR = Path("/opt/airflow/data")
-RAW_DIR = DATA_DIR / "raw"
-TEMP_DIR = DATA_DIR / "temp"
-PROCESSED_DIR = DATA_DIR / "processed"
-SAMPLE_DIR = DATA_DIR / "sample"
-
 
 default_args = {
     "owner": "nba_data_forge",
@@ -31,41 +24,24 @@ default_args = {
 
 
 def combine_historical_data(**context):
-    print(f"Looking for files in: {SAMPLE_DIR}")
-    print(f"Directory exists: {SAMPLE_DIR.exists()}")
+    sample_dir = paths.get_path("sample")
 
-    # Add this debug information
-    print("Files in directory:")
-    for file in SAMPLE_DIR.iterdir():
-        print(f"- {file}")
+    logger = LoggingMixin().log
+    logger.info(f"Starting historical data combination from: {sample_dir}")
+    logger.info(f"Directory exists: {sample_dir.exists()}")
 
     all_game_logs = []
-    csv_pattern = "sample_game_logs_*.csv"
-    print(f"\nLooking for files matching pattern: {csv_pattern}")
-
-    for season_file in SAMPLE_DIR.glob("sample_game_logs_*.csv"):
+    season_files = sample_dir.glob("sample_game_logs_*.csv")
+    for season_file in season_files:
         try:
-            print(f"Attempting to read: {season_file}")
-
             df = pd.read_csv(season_file)
             df["season"] = int(
                 season_file.stem.split("_")[3]
             )  # Extract year from filename
             all_game_logs.append(df)
-
-            msg = f"Processed {season_file.name}: {len(df)} records"
-            print(msg)
-
-            context["task_instance"].xcom_push(
-                key=f"processed_file_{season_file.stem}",
-                value=f"Processed {season_file.name}: {len(df)} records",
-            )
+            logger.info(f"Processed {season_file.name}: {len(df)} records")
         except Exception as e:
-            context["task_instance"].xcom_push(
-                key=f"erroe_file_{season_file.stem}",
-                value=f"Error processing {season_file.name}: {str(e)}",
-            )
-            raise
+            logger.error(f"Error processing {season_file.name}: {str(e)}")
 
     combined_data = pd.concat(all_game_logs, ignore_index=True)
 
@@ -75,23 +51,22 @@ def combine_historical_data(**context):
         key="season_counts", value=season_counts.to_dict()
     )
 
-    output_path = Path(TEMP_DIR / "historical_game_logs_raw.csv")
-    # output_path = Path("/opt/airflow/data/temp/historical_game_logs_raw.csv")
+    output_path = paths.get_path("temp") / "historical_game_logs_raw.csv"
     output_path.parent.mkdir(parents=True, exist_ok=True)
     combined_data.to_csv(output_path, index=False)
     return f"Combined {len(all_game_logs)} season files, Total record: {len(combined_data)}"
 
 
 def transform_data(**context):
+    logger = LoggingMixin().log
+
     transformer = GameLogTransformer()
-    input_path = Path(TEMP_DIR / "historical_game_logs_raw.csv")
-    # input_path = Path("/opt/airflow/data/temp/historical_game_logs_raw.csv")
+    temp_dir = paths.get_path("temp")
+    input_path = temp_dir / "historical_game_logs_raw.csv"
 
     raw_data = pd.read_csv(input_path)
     transformed_data = transformer.transform(raw_data)
-    # transformed_data = transform_game_logs(raw_data)
-    output_path = Path(TEMP_DIR / "historical_game_logs_transformed.csv")
-    # output_path = Path("/opt/airflow/data/temp/historical_game_logs_transformed.csv")
+    output_path = temp_dir / "historical_game_logs_transformed.csv"
     transformed_data.to_csv(output_path, index=False)
 
     summary = {
@@ -102,14 +77,13 @@ def transform_data(**context):
     }
 
     context["task_instance"].xcom_push(key="transformation_summary", value=summary)
-
+    logger.info(f"Transformation summary: {summary}")
     return f"Tranformed {summary['total record']} records across {summary['seasons']} seasons"
 
 
 def load_data(**context):
     loader = DatabaseLoader()
-    input_path = Path(TEMP_DIR / "historical_game_logs_transformed.csv")
-
+    input_path = paths.get_path("temp") / "historical_game_logs_transformed.csv"
     data = pd.read_csv(input_path)
     loader.load(data)
 

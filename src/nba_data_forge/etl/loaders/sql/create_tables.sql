@@ -32,11 +32,19 @@ CREATE TABLE IF NOT EXISTS game_logs (
     minutes_played DECIMAL(10,3) NOT NULL
 );
 
--- Add indexes for common query patterns
+-- Add indexes if they don't exist
 CREATE INDEX IF NOT EXISTS idx_game_logs_player_id ON game_logs(player_id);
 CREATE INDEX IF NOT EXISTS idx_game_logs_date ON game_logs(date);
 CREATE INDEX IF NOT EXISTS idx_game_logs_player_date ON game_logs(player_id, date);
 
--- Add unique constraint for upsert
-ALTER TABLE game_logs ADD CONSTRAINT unique_game_player 
-UNIQUE (date, player_id);
+-- Add unique constraint if it doesn't exist
+DO $$ 
+BEGIN 
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint 
+        WHERE conname = 'unique_game_player'
+    ) THEN
+        ALTER TABLE game_logs ADD CONSTRAINT unique_game_player 
+        UNIQUE (date, player_id);
+    END IF;
+END $$;

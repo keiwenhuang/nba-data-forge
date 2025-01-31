@@ -3,14 +3,14 @@ from pathlib import Path
 import pandas as pd
 from sqlalchemy import create_engine, text
 
-from nba_data_forge.api.core import config
+from nba_data_forge.api.core.config import config
 from nba_data_forge.etl.utils.path import get_project_root
 
 
 class DatabaseLoader:
     def __init__(self):
         self.engine = self._create_engine()
-        self.sql_dir = Path(__file__).parent / "sql"
+        self.sql_dir = get_project_root() / "src/nba_data_forge/etl/loaders/sql"
 
     def _create_engine(self):
         try:
@@ -21,8 +21,7 @@ class DatabaseLoader:
             raise Exception(f"Failed to create database engine: {e}")
 
     def _load_sql(self, file_name):
-        root = get_project_root()
-        sql_path = Path(root / "data_engineering/loaders/sql" / file_name)
+        sql_path = Path(self.sql_dir / file_name)
         return sql_path.read_text()
 
     def _create_table(self):
@@ -34,9 +33,7 @@ class DatabaseLoader:
     def load(self, df: pd.DataFrame):
         try:
             self._create_table()
-
             df.to_sql("temp_game_logs", self.engine, if_exists="replace", index=False)
-
             upsert_sql = self._load_sql("upsert_game_logs.sql")
             with self.engine.connect() as connection:
                 connection.execute(text(upsert_sql))

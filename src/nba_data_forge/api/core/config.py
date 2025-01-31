@@ -5,6 +5,7 @@ from pathlib import Path
 from nba_data_forge.etl.utils.path import get_project_root
 
 ROOT = get_project_root()
+print(ROOT)
 
 
 class Config:
@@ -16,12 +17,9 @@ class Config:
             # Docker environment
             Path("/opt/airflow/config/config.ini"),
             # Local development - project root config
-            Path(__file__).parent.parent.parent.parent.parent / "config.ini",
+            ROOT / "config.ini",
             # Local development - airflow config
-            Path(__file__).parent.parent.parent.parent.parent
-            / "airflow"
-            / "config"
-            / "config.ini",
+            ROOT / "airflow" / "config" / "config.ini",
         ]
 
         # Try each location until we find one that exists
