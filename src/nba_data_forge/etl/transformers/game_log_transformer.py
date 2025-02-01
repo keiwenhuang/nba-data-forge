@@ -46,44 +46,30 @@ class GameLogTransformer:
             "san antonio spurs": "SAS",
             "seattle supersonics": "OKC",  # relocated
             "toronto raptors": "TOR",
-            "team.atlanta_hawks": "ATL",
-            "team.boston_celtics": "BOS",
-            "team.brooklyn_nets": "BKN",  # relocated
-            "team.charlotte_bobcats": "CHA",  # renamed
-            "team.charlotte_hornets": "CHA",
-            "team.chicago_bulls": "CHI",
-            "team.cleveland_cavaliers": "CLE",
-            "team.dallas_mavericks": "DAL",
-            "team.denver_nuggets": "DEN",
-            "team.detroit_pistons": "DET",
-            "team.golden_state_warriors": "GSW",
-            "team.houston_rockets": "HOU",
-            "team.indiana_pacers": "IND",
-            "team.los_angeles_clippers": "LAC",
-            "team.los_angeles_lakers": "LAL",
-            "team.memphis_grizzlies": "MEM",
-            "team.miami_heat": "MIA",
-            "team.milwaukee_bucks": "MIL",
-            "team.minnesota_timberwolves": "MIN",
-            "team.new_jersey_nets": "BKN",  # relocated
-            "team.new_orleans_hornets": "NOP",  # renamed
-            "team.new_orleans_oklahoma_city_hornets": "NOP",  # temp relocated
-            "team.new_orleans_pelicans": "NOP",
-            "team.new_york_knicks": "NYK",
-            "team.oklahoma_city_thunder": "OKC",
-            "team.orlando_magic": "ORL",
-            "team.philadelphia_76ers": "PHI",
-            "team.phoenix_suns": "PHX",
-            "team.portland_trail_blazers": "POR",
-            "team.sacramento_kings": "SAC",
-            "team.san_antonio_spurs": "SAS",
-            "team.seattle_supersonics": "OKC",  # relocated
-            "team.toronto_raptors": "TOR",
-            "team.utah_jazz": "UTA",
-            "team.washington_wizards": "WAS",
             "utah jazz": "UTA",
             "washington wizards": "WAS",
         }
+
+    def _clean_column(self, df: pd.DataFrame, column: str):
+        self.logger.info(f"Cleaning column: {column}")
+
+        try:
+
+            def clean(item):
+                if pd.isna(item):
+                    return None
+
+                if "." in item:
+                    item = str(item).split(".")[1]
+
+                if "_" in item:
+                    item = item.replace("_", " ")
+                return item
+
+            return df[column].apply(clean)
+        except Exception as e:
+            self.logger.error(f"Error cleaning column {column}: {str(e)}")
+            raise
 
     def transform(self, df: pd.DataFrame):
         """
@@ -102,12 +88,19 @@ class GameLogTransformer:
 
         try:
             result = df.copy()
+
+            result["team"] = self._clean_column(result, "team")
+            result["opponent"] = self._clean_column(result, "opponent")
+            result["location"] = self._clean_column(result, "location")
+            result["outcome"] = self._clean_column(result, "outcome")
+
             result["team_abbrev"] = result["team"].str.lower().map(self.team_mapping)
             result["opponent_abbrev"] = (
                 result["opponent"].str.lower().map(self.team_mapping)
             )
-            result["is_home"] = result["location"].isin(["Location.HOME", "HOME"])
-            result["is_win"] = result["outcome"].isin(["Outcome.WIN", "WIN"])
+            result["is_home"] = result["location"] == "HOME"
+            result["is_win"] = result["outcome"] == "WIN"
+
             result["minutes_played"] = round(df["seconds_played"] / 60, 3)
 
         except Exception as e:
