@@ -1,6 +1,7 @@
 from configparser import ConfigParser
 from pathlib import Path
 
+from nba_data_forge.common.utils.logger import setup_logger
 from nba_data_forge.common.utils.path import get_project_root
 
 ROOT = get_project_root()
@@ -9,6 +10,9 @@ ROOT = get_project_root()
 class Config:
     def __init__(self):
         self.config = ConfigParser()
+
+        log_dir = get_project_root() / "logs"
+        self.logger = setup_logger(__class__.__name__, log_dir=log_dir)
 
         # Check multiple possible config locations
         possible_locations = [
@@ -34,17 +38,24 @@ class Config:
         self._load_config()
 
     def _load_config(self):
-        print(f"Loading config from: {self.config_file}")  # Debug info
+        self.logger.info(f"Loading config from: {self.config_file}")  # Debug info
         self.config.read(self.config_file)
         if not self.config.sections():
             raise ValueError("Config file is empty or invalid.")
 
     def get_database_url(self):
+        """Get basic PostgreSQL URL"""
         try:
             db = self.config["postgresql"]
             return f"postgresql://{db['user']}:{db['password']}@{db['host']}:{db['port']}/{db['database']}"
         except KeyError:
             raise KeyError("Section 'postgresql' not found in the config file.")
+
+    def get_sqlalchemy_url(self):
+        """Get SQLAlchemy-specific URL with psycopg2 driver"""
+        return self.get_database_url().replace(
+            "postgresql://", "postgresql+psycopg2://"
+        )
 
 
 config = Config()

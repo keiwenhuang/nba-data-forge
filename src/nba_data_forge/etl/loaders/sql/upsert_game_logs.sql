@@ -62,7 +62,7 @@ SELECT
     is_win,
     minutes_played
 FROM temp_game_logs
-ON CONFLICT (date, player_id) 
+ON CONFLICT (date, player_id, team, game_score) 
 DO UPDATE SET
     team = EXCLUDED.team,
     location = EXCLUDED.location,

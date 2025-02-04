@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS game_logs (
+CREATE TABLE IF NOT EXISTS test_game_logs (
     id SERIAL PRIMARY KEY,
     date DATE NOT NULL,
     team VARCHAR NOT NULL,
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS game_logs (
     is_home BOOLEAN NOT NULL,
     is_win BOOLEAN NOT NULL,
     minutes_played DECIMAL(10,3) NOT NULL,
-    CONSTRAINT unique_game_player UNIQUE (date, player_id, team, game_score)
+    CONSTRAINT unique_player UNIQUE (date, player_id, team, game_score)
 );
 
 -- Indexes

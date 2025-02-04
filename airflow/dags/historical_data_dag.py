@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from pathlib import Path
 
 import pandas as pd
 
@@ -24,19 +23,19 @@ default_args = {
 
 
 def combine_historical_data(**context):
-    sample_dir = paths.get_path("sample")
+    data_dir = paths.get_path("raw")
 
     logger = LoggingMixin().log
-    logger.info(f"Starting historical data combination from: {sample_dir}")
-    logger.info(f"Directory exists: {sample_dir.exists()}")
+    logger.info(f"Starting historical data combination from: {data_dir}")
+    logger.info(f"Directory exists: {data_dir.exists()}")
 
     all_game_logs = []
-    season_files = sample_dir.glob("sample_game_logs_*.csv")
+    season_files = data_dir.glob("game_logs_*.csv")
     for season_file in season_files:
         try:
             df = pd.read_csv(season_file)
             df["season"] = int(
-                season_file.stem.split("_")[3]
+                season_file.stem.split("_")[2]
             )  # Extract year from filename
             all_game_logs.append(df)
             logger.info(f"Processed {season_file.name}: {len(df)} records")

@@ -4,7 +4,7 @@ import pandas as pd
 import psycopg2
 from sqlalchemy import create_engine
 
-from nba_data_forge.common import config
+from nba_data_forge.common.config import config
 
 
 def get_db_config(config_file="./config/database.ini", section="postgresql"):
