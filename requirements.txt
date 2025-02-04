@@ -211,7 +211,7 @@ watchfiles==1.0.4
 wcwidth==0.2.13
 websockets==14.1
 # Pin Werkzeug < 3.0.0 for Airflow/Connexion compatibility
-Werkzeug==2.2.3
+werkzeug>=2.2.3,<3.0.0
 wirerope==1.0.0
 wrapt==1.17.2
 WTForms==3.2.1
