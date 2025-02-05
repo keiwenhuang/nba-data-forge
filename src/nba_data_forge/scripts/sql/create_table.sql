@@ -25,12 +25,13 @@ CREATE TABLE IF NOT EXISTS game_logs (
     plus_minus INTEGER NOT NULL,
     player_id VARCHAR NOT NULL,
     name VARCHAR NOT NULL,
+    season INTEGER NOT NULL, 
     team_abbrev CHAR(3) NOT NULL,
     opponent_abbrev CHAR(3) NOT NULL,
     is_home BOOLEAN NOT NULL,
     is_win BOOLEAN NOT NULL,
     minutes_played DECIMAL(10,3) NOT NULL,
-    CONSTRAINT unique_game_player UNIQUE (date, player_id, team, game_score)
+    CONSTRAINT unique_game_player_team UNIQUE (date, player_id, team, opponent)
 );
 
 -- Indexes

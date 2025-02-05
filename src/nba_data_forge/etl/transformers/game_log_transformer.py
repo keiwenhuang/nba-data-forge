@@ -21,7 +21,9 @@ class GameLogTransformer:
         self.team_mapping = {
             "atlanta hawks": "ATL",
             "boston celtics": "BOS",
+            "brooklyn nets": "BKN",
             "charlotte bobcats": "CHA",  # renamed
+            "charlotte hornets": "CHA",
             "chicago bulls": "CHI",
             "cleveland cavaliers": "CLE",
             "dallas mavericks": "DAL",
@@ -38,6 +40,8 @@ class GameLogTransformer:
             "minnesota timberwolves": "MIN",
             "new jersey nets": "BKN",  # relocated
             "new orleans hornets": "NOP",  # renamed
+            "new orleans oklahoma city hornets": "NOP",  # temp relocated
+            "new orleans pelicans": "NOP",
             "new york knicks": "NYK",
             "oklahoma city thunder": "OKC",
             "orlando magic": "ORL",

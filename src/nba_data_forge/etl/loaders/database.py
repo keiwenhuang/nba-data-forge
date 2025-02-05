@@ -1,11 +1,3 @@
-"""Database loader for NBA game logs.
-
-Handles PostgreSQL connections, table creation, and data loading with 
-transaction safety and error handling.
-"""
-
-from pathlib import Path
-
 import pandas as pd
 from sqlalchemy import create_engine, text
 
@@ -15,53 +7,56 @@ from nba_data_forge.common.utils.path import get_project_root
 
 
 class DatabaseLoader:
+    """Handles loading of transformed NBA game log data into PostgreSQL database.
+
+    This class assumes the database and required tables have already been created
+    through the database initialization script. It focuses solely on efficient
+    data loading using SQLAlchemy and pandas.
+
+    Attributes:
+        logger: Configured logger for the database loading operations
+        engine: SQLAlchemy engine instance for database connections
+
+    Note:
+        Before using this loader, ensure that:
+        1. The database has been created
+        2. The schema has been initialized using init_database.py script
+        3. The game_logs table exists with the correct structure
+    """
+
     def __init__(self):
-        log_dir = get_project_root() / "logs"
-        self.logger = setup_logger(__class__.__name__, log_dir=log_dir)
-
-        db_url = config.get_sqlalchemy_url()
-        self.engine = create_engine(db_url)
-        self.sql_dir = get_project_root() / "src/nba_data_forge/etl/loaders/sql"
-
-    def _load_sql(self, file_name):
-        """Load SQL query from file"""
-        sql_path = Path(self.sql_dir / file_name)
-        return sql_path.read_text()
-
-    def _create_table(self):
-        """Create game_logs table if does not exist"""
-        create_table_sql = self._load_sql("create_tables.sql")
-        try:
-            with self.engine.begin() as connection:
-                connection.execute(text(create_table_sql))
-        except Exception as e:
-            self.logger.error(f"Error creating table: {str(e)}")
-            raise
+        self.logger = setup_logger(__class__.__name__, get_project_root() / "logs")
+        self.engine = create_engine(config.get_sqlalchemy_url())
 
     def load(self, df: pd.DataFrame):
-        """Load data with upsert pattern using temp table"""
-        try:
-            self.logger.info(f"Starting data load for temp_game_logs")
-            self.logger.info(f"Creating/validating table structure")
-            self._create_table()
+        """Load transformed game log data into the database.
 
-            self.logger.info(f"Loading {len(df)} records into temporary table")
+        Uses pandas to_sql with optimized parameters for bulk loading:
+        - method='multi' for faster inserts
+        - chunksize=10000 to handle large datasets efficiently
+        - if_exists='append' to add new records to existing table
+
+        Args:
+            df: pandas DataFrame containing transformed game log data.
+                Expected to match the game_logs table schema.
+
+        Raises:
+            Exception: If any database operation fails, with error details logged.
+
+        Example:
+            loader = DatabaseLoader()
+            loader.load(transformed_game_logs_df)
+        """
+        try:
+            self.logger.info("Loading to game_logs table...")
             df.to_sql(
-                "temp_game_logs",
+                "game_logs",
                 self.engine,
                 if_exists="append",
                 index=False,
-                method="multi",  # For better performance
-                chunksize=10000,  # Handle large datasets
+                method="multi",
+                chunksize=10000,
             )
-
-            self.logger.info("Executing upsert and dropping temporary table")
-            upsert_and_drop_sql = f"{self._load_sql('upsert_game_logs.sql')}"
-            with self.engine.connect() as conn:
-                conn.execute(text(upsert_and_drop_sql))
-                conn.execute(text("DROP TABLE IF EXISTS temp_game_logs;"))
-
-            self.logger.info(f"Successfully loaded {len(df)} records")
         except Exception as e:
             self.logger.error(f"Error loading data: {str(e)}")
             raise
