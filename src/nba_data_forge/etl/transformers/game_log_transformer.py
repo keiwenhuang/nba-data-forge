@@ -1,83 +1,22 @@
+import re
 from pathlib import Path
 
 import pandas as pd
 
-from nba_data_forge.common.utils.logger import setup_logger
-from nba_data_forge.common.utils.paths import paths
+from nba_data_forge.etl.transformers.base import BaseTransformer
 
 
-class GameLogTransformer:
+class GameLogTransformer(BaseTransformer):
     def __init__(self, log_dir: Path | None = None):
-        """
-        Initialize the transformer with team mappings and logger.
+        super().__init__(log_dir)
 
-        Args:
-            log_dir: Optional directory for logs. Defaults to project_root/logs
-        """
+    def _extract_season(self, filename: str):
+        match = re.search(r"game_logs_(\d{4})\.csv", filename)
+        if not match:
+            raise ValueError(f"Could not extract season from filename: {filename}")
+        return int(match.group(1))
 
-        if log_dir is None:
-            log_dir = paths.get_path("logs")
-        self.logger = setup_logger(__class__.__name__, log_dir=log_dir)
-        self.team_mapping = {
-            "atlanta hawks": "ATL",
-            "boston celtics": "BOS",
-            "brooklyn nets": "BKN",
-            "charlotte bobcats": "CHA",  # renamed
-            "charlotte hornets": "CHA",
-            "chicago bulls": "CHI",
-            "cleveland cavaliers": "CLE",
-            "dallas mavericks": "DAL",
-            "denver nuggets": "DEN",
-            "detroit pistons": "DET",
-            "golden state warriors": "GSW",
-            "houston rockets": "HOU",
-            "indiana pacers": "IND",
-            "los angeles clippers": "LAC",
-            "los angeles lakers": "LAL",
-            "memphis grizzlies": "MEM",
-            "miami heat": "MIA",
-            "milwaukee bucks": "MIL",
-            "minnesota timberwolves": "MIN",
-            "new jersey nets": "BKN",  # relocated
-            "new orleans hornets": "NOP",  # renamed
-            "new orleans oklahoma city hornets": "NOP",  # temp relocated
-            "new orleans pelicans": "NOP",
-            "new york knicks": "NYK",
-            "oklahoma city thunder": "OKC",
-            "orlando magic": "ORL",
-            "philadelphia 76ers": "PHI",
-            "phoenix suns": "PHX",
-            "portland trail blazers": "POR",
-            "sacramento kings": "SAC",
-            "san antonio spurs": "SAS",
-            "seattle supersonics": "OKC",  # relocated
-            "toronto raptors": "TOR",
-            "utah jazz": "UTA",
-            "washington wizards": "WAS",
-        }
-
-    def _clean_column(self, df: pd.DataFrame, column: str):
-        self.logger.info(f"Cleaning column: {column}")
-
-        try:
-
-            def clean(item):
-                if pd.isna(item):
-                    return None
-
-                if "." in item:
-                    item = str(item).split(".")[1]
-
-                if "_" in item:
-                    item = item.replace("_", " ")
-                return item
-
-            return df[column].apply(clean)
-        except Exception as e:
-            self.logger.error(f"Error cleaning column {column}: {str(e)}")
-            raise
-
-    def transform(self, df: pd.DataFrame):
+    def transform(self, df: pd.DataFrame, filename: str):
         """
         Transform game log data with standardized team abbreviations and boolean flags.
 
@@ -94,20 +33,29 @@ class GameLogTransformer:
 
         try:
             result = df.copy()
+            season = self._extract_season(filename)
+            result["season"] = season
 
+            # Clean and standardize team/location/outcome columns
             result["team"] = self._clean_column(result, "team")
             result["opponent"] = self._clean_column(result, "opponent")
             result["location"] = self._clean_column(result, "location")
             result["outcome"] = self._clean_column(result, "outcome")
 
-            result["team_abbrev"] = result["team"].str.lower().map(self.team_mapping)
+            # Add team abbreviations
+            result["team_abbrev"] = result["team"].str.lower().map(self.team_mappings)
             result["opponent_abbrev"] = (
-                result["opponent"].str.lower().map(self.team_mapping)
+                result["opponent"].str.lower().map(self.team_mappings)
             )
+            # Add boolean flags
             result["is_home"] = result["location"] == "HOME"
             result["is_win"] = result["outcome"] == "WIN"
 
             result["minutes_played"] = round(df["seconds_played"] / 60, 3)
+
+            self.logger.info(
+                f"Transformed {len(result)} game logs with {len(result.columns)} columns"
+            )
 
         except Exception as e:
             self.logger.error(f"Error transforming: {str(e)}")

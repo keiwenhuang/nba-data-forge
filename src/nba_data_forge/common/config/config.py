@@ -49,11 +49,10 @@ class Config:
         except KeyError:
             raise KeyError(f"Section '{section}' not found in config")
 
-    def get_sqlalchemy_url(self):
+    def get_sqlalchemy_url(self, test=False):
         """Get SQLAlchemy-specific URL with psycopg2 driver"""
-        return self.get_database_url().replace(
-            "postgresql://", "postgresql+psycopg2://"
-        )
+        database_url = self.get_database_url(test=test)
+        return database_url.replace("postgresql://", "postgresql+psycopg2://")
 
 
 config = Config()

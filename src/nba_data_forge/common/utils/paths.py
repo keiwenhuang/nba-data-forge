@@ -29,6 +29,9 @@ class PathManager:
             "raw": data_dir / "raw",
             "processed": data_dir / "processed",
             "temp": data_dir / "temp",
+            "archive": data_dir / "archive",
+            "raw_archive": data_dir / "archive/raw",
+            "transformed_archive": data_dir / "archive/transformed",
             "checkpoints": data_dir / "checkpoints",
         }
 
@@ -48,7 +51,7 @@ class PathManager:
         """Get appropriate config file path"""
         if self.is_airflow:
             return Path("/opt/airflow/config/config.ini")
-        return self.get_path("config") / "config.ini"
+        return self.project_root / "config.ini"
 
 
 paths = PathManager()

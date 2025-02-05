@@ -24,9 +24,9 @@ class DatabaseLoader:
         3. The game_logs table exists with the correct structure
     """
 
-    def __init__(self):
+    def __init__(self, test=False):
         self.logger = setup_logger(__class__.__name__, paths.get_path("logs"))
-        self.engine = create_engine(config.get_sqlalchemy_url())
+        self.engine = create_engine(config.get_sqlalchemy_url(test))
 
     def load(self, df: pd.DataFrame):
         """Load transformed game log data into the database.
