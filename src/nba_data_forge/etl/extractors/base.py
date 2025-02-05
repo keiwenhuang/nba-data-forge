@@ -1,23 +1,29 @@
 import time
 from abc import ABC, abstractmethod
 from random import uniform
+from typing import Dict, Optional
 
 import pandas as pd
 import requests
 
+from nba_data_forge.common.utils.checkpoint import CheckpointManager
 from nba_data_forge.common.utils.logger import setup_logger
 from nba_data_forge.common.utils.paths import paths
 
 
 class BaseExtractor(ABC):
-    def __init__(self, base_url="https://www.basketball-reference.com", log_dir=None):
+    def __init__(self, base_url="https://www.basketball-reference.com"):
         self.base_url = base_url
+        self.checkpoint_manager = CheckpointManager()
+        self.logger = setup_logger(
+            name=self.__class__.__name__, log_dir=paths.get_path("logs")
+        )
 
-        if log_dir is None:
-            self.log_dir = paths.get_path("logs")
-        else:
-            self.log_dir = log_dir
-        self.logger = setup_logger(name=self.__class__.__name__, log_dir=self.log_dir)
+    def save_checkpoint(self, identifier: str, data: Dict[str, any]) -> None:
+        self.checkpoint_manager.save(identifier, data, self.logger)
+
+    def load_checkpoint(self, identifier: str) -> Optional[Dict[str, any]]:
+        return self.checkpoint_manager.load(identifier)
 
     def _handle_rate_limit(self, response, retry_after=60):
         if response.status_code == 429:

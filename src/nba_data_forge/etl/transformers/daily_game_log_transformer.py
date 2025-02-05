@@ -7,6 +7,6 @@ class DailyGameLogTransformer(BaseTransformer):
 
     def transform(self, df):
         try:
-            pass
+            
         except Exception as e:
             self.logger.error(f"Error transforming: {str(e)}")

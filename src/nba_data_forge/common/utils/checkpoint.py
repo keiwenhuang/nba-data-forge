@@ -3,6 +3,8 @@ import json
 from pathlib import Path
 from typing import Dict, List
 
+from nba_data_forge.common.utils.paths import paths
+
 
 class DateTimeEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -14,38 +16,34 @@ class DateTimeEncoder(json.JSONEncoder):
 
 
 class CheckpointManager:
-    def __init__(self, base_dir="data/checkpoints"):
-        self.base_dir = Path(base_dir)
+    def __init__(self):
+        self.base_dir = paths.get_path("checkpoints")
         self.base_dir.mkdir(parents=True, exist_ok=True)
 
-    def save_checkpoint(self, season: int, idx: int, data: List[Dict], logger=None):
-        checkpoint = {"season": season, "idx": idx, "data": data}
-        checkpoint_path = self.base_dir / f"checkpoint_{season}.json"
+    def save(self, identifier: str, data: Dict, logger=None):
+        checkpoint_path = self.base_dir / f"checkpoint_{identifier}.json"
 
         try:
             with open(checkpoint_path, "w") as file:
-                json.dump(checkpoint, file, cls=DateTimeEncoder)
+                json.dump(data, file, cls=DateTimeEncoder)
             if logger:
-                logger.info(f"Checkpoint saved: season {season}, player {idx}")
+                logger.info(f"Checkpoint saved: {identifier}")
         except Exception as e:
             if logger:
                 logger.error(f"Failed to save checkpoint: {str(e)}")
             raise
 
-    def load_latest_checkpoint(self, season: int):
-        checkpoints = list(self.base_dir.glob(f"checkpoint_{season}.json"))
-        if not checkpoints:
+    def load(self, identifier: str):
+        checkpoint_path = self.base_dir / f"checkpoint_{identifier}.json"
+        if not checkpoint_path:
             return None
 
-        latest = max(checkpoints, key=lambda x: x.stem.split("_")[-1])
-
         try:
-            with open(latest, "r") as file:
+            with open(checkpoint_path, "r") as file:
                 return json.load(file)
         except Exception:
             return None
 
-    def list_checkpoints(self, season: int = None) -> List[Path]:
-        """List all checkpoints, optionally filtered by season"""
-        pattern = f"checkpoint_{season}.json" if season else "checkpoint_*.json"
-        return sorted(self.base_dir.glob(pattern))
+    def list_all(self) -> List[Path]:
+        """List all checkpoint files"""
+        return sorted(self.base_dir.glob("checkpoint_*.json"))
