@@ -3,7 +3,7 @@ from sqlalchemy import create_engine, text
 
 from nba_data_forge.common.config.config import config
 from nba_data_forge.common.utils.logger import setup_logger
-from nba_data_forge.common.utils.path import get_project_root
+from nba_data_forge.common.utils.paths import paths
 
 
 class DatabaseLoader:
@@ -25,7 +25,7 @@ class DatabaseLoader:
     """
 
     def __init__(self):
-        self.logger = setup_logger(__class__.__name__, get_project_root() / "logs")
+        self.logger = setup_logger(__class__.__name__, paths.get_path("logs"))
         self.engine = create_engine(config.get_sqlalchemy_url())
 
     def load(self, df: pd.DataFrame):

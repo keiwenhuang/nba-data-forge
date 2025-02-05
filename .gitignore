@@ -1,6 +1,6 @@
 /env
 .python-version
-/data
+/data/
 /config
 .env
 __pycache__/
@@ -9,6 +9,7 @@ config.ini
 *.egg-info
 /logs
 .pytest_cache
+scripts/data/checkpoints/
 
 # Airflow
 airflow/logs/

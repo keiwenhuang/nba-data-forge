@@ -31,7 +31,7 @@ from airflow.models import TaskInstance
 from airflow.operators.empty import EmptyOperator
 from airflow.operators.python import PythonOperator
 from airflow.utils.log.logging_mixin import LoggingMixin
-from nba_data_forge.common.config.paths import paths
+from nba_data_forge.common.utils.paths import paths
 from nba_data_forge.etl.loaders.database import DatabaseLoader
 from nba_data_forge.etl.transformers.game_log_transformer import GameLogTransformer
 

@@ -2,15 +2,15 @@ from sqlalchemy import create_engine, text
 
 from nba_data_forge.common.config.config import config
 from nba_data_forge.common.utils.logger import setup_logger
-from nba_data_forge.common.utils.path import get_project_root
+from nba_data_forge.common.utils.paths import paths
 
 
 def init_database():
-    logger = setup_logger(__file__, get_project_root() / "logs")
+    logger = setup_logger(__file__, paths.get_path("logs"))
     engine = create_engine(config.get_sqlalchemy_url())
     logger.info("Initializing database schema...")
 
-    sql_file = get_project_root() / "src/nba_data_forge/scripts/sql/create_table.sql"
+    sql_file = paths.root / "src/nba_data_forge/scripts/sql/create_table.sql"
 
     try:
         with engine.begin() as conn:

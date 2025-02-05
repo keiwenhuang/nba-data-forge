@@ -1,11 +1,20 @@
-from pathlib import Path
+from datetime import date, datetime
 
-import pandas as pd
-from sqlalchemy import create_engine, text
-
-from nba_data_forge.common.config.config import config
-from nba_data_forge.common.utils.path import get_project_root
+from nba_data_forge.etl.extractors.game_log_extractor import GameLogExtractor
 from nba_data_forge.etl.transformers.game_log_transformer import GameLogTransformer
+
+extractor = GameLogExtractor()
+extractor.extract()
+start_date = datetime.strptime("2024-02-01", "%Y-%m-%d")
+end_date = datetime.strptime("2024-02-02", "%Y-%m-%d")
+df = extractor.extract_date_range(start_date, end_date)
+print("Dataset Shape:", df.shape)
+print("\nColumn Names:")
+print(df.columns.tolist())
+print("\nData Types:")
+print(df.dtypes)
+print(df.head())
+
 
 # def _load_sql():
 #     sql_path = (
@@ -23,15 +32,15 @@ from nba_data_forge.etl.transformers.game_log_transformer import GameLogTransfor
 #     conn.execute(text(create_table_sql))
 
 
-df = pd.read_csv(f"./data/temp/game_logs_2006_transformed.csv")
-transformer = GameLogTransformer()
-processed_df = transformer.transform(df)
-print(
-    processed_df[
-        (processed_df["date"] == "2005-11-01")
-        & (processed_df["player_id"] == "abdursh01")
-    ]
-)
+# df = pd.read_csv(f"./data/temp/game_logs_2006_transformed.csv")
+# transformer = GameLogTransformer()
+# processed_df = transformer.transform(df)
+# print(
+#     processed_df[
+#         (processed_df["date"] == "2005-11-01")
+#         & (processed_df["player_id"] == "abdursh01")
+#     ]
+# )
 
 
 # if processed_df.isna().any().any():

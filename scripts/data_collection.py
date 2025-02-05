@@ -1,16 +1,15 @@
 import argparse
 import sys
-from pathlib import Path
 
 import pandas as pd
 
+from nba_data_forge.common.utils.paths import paths
 from nba_data_forge.etl.extractors.game_log_extractor import GameLogExtractor
 from nba_data_forge.etl.extractors.player_extractor import PlayerExtractor
-from nba_data_forge.etl.utils.path import get_project_root
 
 
 def ensure_data_directories():
-    root = get_project_root()
+    root = paths.root
     (root / "data/raw").mkdir(parents=True, exist_ok=True)
     (root / "data/processed").mkdir(parents=True, exist_ok=True)
     (root / "data/checkpoints").mkdir(parents=True, exist_ok=True)
@@ -19,12 +18,12 @@ def ensure_data_directories():
 def collect_player_data():
     player_extractor = PlayerExtractor()
     df = player_extractor.extract()
-    df.to_csv("data/raw/players.csv", index=False)
+    df.to_csv("data/players/players.csv", index=False)
 
 
 def collect_game_logs(from_season: int, to_season: int = None):
-    root = get_project_root()
-    players = pd.read_csv(root / "data/raw/players.csv")
+    root = paths.root
+    players = pd.read_csv(root / "data/players/players.csv")
     game_log_extractor = GameLogExtractor(checkpoint_dir=root / "data/checkpoints")
 
     for season in range(from_season, to_season + 1):

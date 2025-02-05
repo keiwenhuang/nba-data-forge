@@ -6,7 +6,7 @@ import pandas as pd
 import requests
 
 from nba_data_forge.common.utils.logger import setup_logger
-from nba_data_forge.common.utils.path import get_project_root
+from nba_data_forge.common.utils.paths import paths
 
 
 class BaseExtractor(ABC):
@@ -14,34 +14,10 @@ class BaseExtractor(ABC):
         self.base_url = base_url
 
         if log_dir is None:
-            root = get_project_root()
-            self.log_dir = root / "logs"
+            self.log_dir = paths.get_path("logs")
         else:
             self.log_dir = log_dir
-        self.logger = setup_logger(name=self.__class__.__name__, log_dir=log_dir)
-
-    # def _setup_logger(self) -> logging.Logger:
-    #     logging.basicConfig(
-    #         level=logging.INFO,
-    #         format="%(asctime)s | %(name)-12s | %(levelname)-8s | %(message)s",
-    #         datefmt="%Y-%m-%d %H:%M:%S",
-    #     )
-
-    #     logger = logging.getLogger(self.__class__.__name__)
-
-    #     log_file = self.log_dir / f"{self.__class__.__name__}.log"
-    #     file_handler = RotatingFileHandler(
-    #         log_file, maxBytes=10 * 1024 * 1024, backupCount=5, encoding="utf-8"
-    #     )
-    #     file_handler.setFormatter(
-    #         logging.Formatter(
-    #             "%(asctime)s | %(name)-12s | %(levelname)-8s | %(message)s",
-    #             datefmt="%Y-%m-%d %H:%M:%S",
-    #         )
-    #     )
-    #     logger.addHandler(file_handler)
-
-    #     return logger
+        self.logger = setup_logger(name=self.__class__.__name__, log_dir=self.log_dir)
 
     def _handle_rate_limit(self, response, retry_after=60):
         if response.status_code == 429:

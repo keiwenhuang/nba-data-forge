@@ -1,47 +1,38 @@
 from configparser import ConfigParser
-from pathlib import Path
-from typing import Literal
 
-from nba_data_forge.common.utils.logger import setup_logger
-from nba_data_forge.common.utils.path import get_project_root
-
-ROOT = get_project_root()
+from nba_data_forge.common.utils.paths import paths
 
 
 class Config:
     def __init__(self):
         self.config = ConfigParser()
-        log_dir = get_project_root() / "logs"
-        self.logger = setup_logger(__class__.__name__, log_dir=log_dir)
-
-        # Detect environment
-        self.environment = self._detect_environment()
-        self.logger.info(f"Detected environment: {self.environment}")
-
-        # Define config locations based on environment
-        self.config_file = self._get_config_location()
+        self.is_airflow = paths.is_airflow
         self._load_config()
 
-    def _detect_environment(self) -> Literal["airflow", "local"]:
-        """Detect if running in Airflow or local"""
-        return "airflow" if Path("/.dockerenv").exists() else "local"
+    # def _detect_environment(self) -> Literal["airflow", "local"]:
+    #     """Detect if running in Airflow or local"""
+    #     return "airflow" if Path("/.dockerenv").exists() else "local"
 
-    def _get_config_location(self) -> Path:
-        """Get config file location based on environment"""
-        if self.environment == "airflow":
-            path = Path("/opt/airflow/config/config.ini")
-        else:
-            path = ROOT / "config.ini"
+    # def _get_config_location(self) -> Path:
+    #     """Get config file location based on environment"""
+    #     if self.environment == "airflow":
+    #         path = Path("/opt/airflow/config/config.ini")
+    #     else:
+    #         path = ROOT / "config.ini"
 
-        if not path.exists():
-            raise FileNotFoundError(f"Config file not found at {path}")
+    #     if not path.exists():
+    #         raise FileNotFoundError(f"Config file not found at {path}")
 
-        self.logger.info(f"Using config file: {path}")
-        return path
+    #     self.logger.info(f"Using config file: {path}")
+    #     return path
 
     def _load_config(self):
-        self.logger.info(f"Loading config from: {self.config_file}")
-        self.config.read(self.config_file)
+        """Load configuration from appropriate location"""
+        config_file = paths.config_file
+        if not config_file.exists():
+            raise FileNotFoundError(f"Config file not found at {config_file}")
+
+        self.config.read(config_file)
         if not self.config.sections():
             raise ValueError("Config file is empty or invalid")
 
@@ -52,9 +43,7 @@ class Config:
             db = self.config[section]
 
             # Use host.docker.internal in Airflow, otherwise use config host
-            host = (
-                "host.docker.internal" if self.environment == "airflow" else db["host"]
-            )
+            host = "host.docker.internal" if self.is_airflow else db["host"]
 
             return f"postgresql://{db['user']}:{db['password']}@{host}:{db['port']}/{db['database']}"
         except KeyError:

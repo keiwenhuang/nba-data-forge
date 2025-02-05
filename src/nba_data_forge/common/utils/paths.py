@@ -3,13 +3,14 @@ from pathlib import Path
 from typing import Dict
 
 
-class PathConfig:
+class PathManager:
     def __init__(self):
         self.is_airflow = bool(os.environ.get("AIRFLOW_HOME"))
-        self.base_dir = self._get_base_dir()
+        self.project_root = self._detect_root()
         self.paths = self._setup_paths()
 
-    def _get_base_dir(self) -> Path:
+    def _detect_root(self) -> Path:
+        """Detect project root based on environment"""
         if self.is_airflow:
             return Path("/opt/airflow")
         else:
@@ -17,14 +18,18 @@ class PathConfig:
             return Path(__file__).parent.parent.parent.parent.parent.resolve()
 
     def _setup_paths(self) -> Dict[str, Path]:
-        data_dir = self.base_dir / "data"
+        """Set up all project paths"""
+        data_dir = self.project_root / "data"
         return {
+            "root": self.project_root,
+            "config": self.project_root / "config",
+            "logs": self.project_root / "logs",
+            # data folders
             "data": data_dir,
             "raw": data_dir / "raw",
             "processed": data_dir / "processed",
             "temp": data_dir / "temp",
-            "logs": data_dir / "logs",
-            "sample": data_dir / "sample",
+            "checkpoints": data_dir / "checkpoints",
         }
 
     def get_path(self, path_type: str) -> Path:
@@ -33,5 +38,17 @@ class PathConfig:
             raise ValueError(f"Unknown path type: {path_type}")
         return self.paths[path_type]
 
+    @property
+    def root(self) -> Path:
+        """Get project root path"""
+        return self.project_root
 
-paths = PathConfig()
+    @property
+    def config_file(self) -> Path:
+        """Get appropriate config file path"""
+        if self.is_airflow:
+            return Path("/opt/airflow/config/config.ini")
+        return self.get_path("config") / "config.ini"
+
+
+paths = PathManager()

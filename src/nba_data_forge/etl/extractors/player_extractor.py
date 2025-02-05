@@ -1,7 +1,7 @@
 import pandas as pd
 from bs4 import BeautifulSoup
 
-from nba_data_forge.etl.extractors import BaseExtractor
+from nba_data_forge.etl.extractors.base import BaseExtractor
 
 
 class PlayerExtractor(BaseExtractor):
