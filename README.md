@@ -3,35 +3,42 @@
 A portfolio project showcasing data engineering and backend development through NBA statistics analysis.
 
 ## Project Overview
-Starting from an existing NBA analytics project, NBA Data Forge evolved into a comprehensive platform demonstrating:
+NBA Data Forge is a comprehensive data platform demonstrating:
 
-- Historical NBA data collection
-- Automated data engineering pipeline
+- Historical NBA data collection (2003-2024)
+- Automated data engineering pipeline with Airflow
 - RESTful API with analytics capabilities
 - Robust error handling and recovery systems
 
-### Data Sources
-- [Basketball Reference](https://www.basketball-reference.com/) - Web scraping for player data
+### Data Sources & Disclaimer
+This project uses data from:
+- [Basketball Reference](https://www.basketball-reference.com/) - Historical player and game data
 - [basketball_reference_web_scraper](https://jaebradley.github.io/basketball_reference_web_scraper/) - Python client for Basketball Reference data
 
-## Project Timeline & Status
-### Phase 1: API Development
-- Utilized existing NBA dataset
-- Implemented basic FastAPI endpoints
-- Created database models and schemas
-- Set up initial analytics features
+**Data Usage Disclaimer:**  
+All NBA data used in this project is sourced from Basketball Reference for educational and demonstration purposes only. This project is not affiliated with or endorsed by Basketball Reference, the NBA, or any NBA teams. Please refer to Basketball Reference's terms of use for information about data usage rights and limitations.
 
-### Phase 2: Data Engineering (Current)
-- Implemented web scraping infrastructure
-- Built data collection pipeline with recovery system
-- Currently collecting historical data (past 20 seasons)
-- Developed checkpoint-based recovery mechanism
 
-### Phase 3: Planned
-- Complete historical data collection
-- Implement incremental data updates
-- Enhance API analytics capabilities
-- Add advanced statistical analysis
+## Current Project Status
+
+### Completed
+- Project structure and environment setup
+- Data collection infrastructure with error handling
+- Initial data quality analysis (523,825 game logs, 2003-2024)
+- Database schema design and implementation
+- Development environment with Docker and Airflow
+- Data transformation pipeline implementation
+- Team name and location standardization
+- Data validation system
+- Loading optimization
+
+### In Progress
+- API endpoint implementation
+- Advanced analytics features
+- Incremental update system
+
+### Planned
+- Performance optimization
 
 ## Technical Implementation
 ### Data Structure
@@ -45,22 +52,20 @@ Note: `is_active` status is determined during data collection from Basketball Re
 ```
 date,team,location,opponent,outcome,seconds_played,points_scored,game_score,plus_minus,player_id
 ```
-Additional fields:
-- `player_id` and `name` are added during data collection
-- Preprocessing adds: `is_home`, `is_win`, `minutes_played`
+Enriched fields:
+- player_id and name (added during collection)
+- is_home, is_win (boolean flags)
+- minutes_played (converted from seconds)
+- team_abbrev, opponent_abbrev (match to current team name abbreviations)
 
-Dataset includes 28 fields per game entry:
-- Game metadata (date, location, teams)
-- Player statistics (points, rebounds, assists)
-- Advanced metrics (game score, plus/minus)
-- Enriched data (player identification, derived statistics)
 
 ### Technical Stack
 - **Backend Framework**: FastAPI
 - **Database**: PostgreSQL
+- **ETL**: Apache Airflow
 - **ORM**: SQLAlchemy
 - **Data Collection**: BeautifulSoup, basketball_reference_web_scraper
-- **Data Processing**: Pandas
+- **Data Processing**: Pandas, NumPy
 - **Schema Validation**: Pydantic
 - **Development Tools**: pytest, Git
 
@@ -120,7 +125,8 @@ Features:
 ## Development Setup
 ### Prerequisites
 - Python 3.12+
-- PostgresSQL
+- Docker & Docker Compose
+- PostgreSQL 16+
 
 ### Configuration
 1. Create PostgreSQL database
@@ -145,13 +151,12 @@ Once running, view the interactive API documentation at:
 
 ## Next Steps
 ### Short Term
-- Complete historical data collection
+- Expand API analytics capabilities
+- Add advanced statistical analysis
 - Implement incremental periodically updates
 - Enhance data validation and quality checks
 
 ### Medium Term
-- Expand API analytics capabilities
-- Add advanced statistical analysis
 - Implement caching and query optimization
 - Performance monitoring and tuning
 
@@ -163,4 +168,10 @@ Once running, view the interactive API documentation at:
 - Clean code practices
 - Project organization
 
-For questions about this portfolio project, please open an issue on GitHub.
+## Contributing
+This is a portfolio project but suggestions and feedback are welcome. Please feel free to open an issue or submit a pull request.
+
+## License
+This project is licensed under the MIT License. See the LICENSE file for details.
+
+Note: While this project uses publicly available data, it is important to respect Basketball Reference's terms of service and data usage guidelines when using their data.
