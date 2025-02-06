@@ -33,6 +33,7 @@ class PathManager:
             "raw_archive": data_dir / "archive/raw",
             "transformed_archive": data_dir / "archive/transformed",
             "checkpoints": data_dir / "checkpoints",
+            "sample": data_dir / "sample",
         }
 
     def get_path(self, path_type: str) -> Path:

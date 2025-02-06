@@ -7,16 +7,13 @@ from nba_data_forge.etl.transformers.base import BaseTransformer
 
 
 class GameLogTransformer(BaseTransformer):
-    def __init__(self, log_dir: Path | None = None):
-        super().__init__(log_dir)
-
-    def _extract_season(self, filename: str):
+    def _extract_season(self, filename: str) -> int:
         match = re.search(r"game_logs_(\d{4})\.csv", filename)
         if not match:
             raise ValueError(f"Could not extract season from filename: {filename}")
         return int(match.group(1))
 
-    def transform(self, df: pd.DataFrame, filename: str):
+    def transform(self, df: pd.DataFrame, filename: str | None = None):
         """
         Transform game log data with standardized team abbreviations and boolean flags.
 
@@ -33,8 +30,10 @@ class GameLogTransformer(BaseTransformer):
 
         try:
             result = df.copy()
-            season = self._extract_season(filename)
-            result["season"] = season
+
+            if filename:
+                season = self._extract_season(filename)
+                result["season"] = season
 
             # Clean and standardize team/location/outcome columns
             result["team"] = self._clean_column(result, "team")
