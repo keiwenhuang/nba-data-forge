@@ -13,3 +13,8 @@ ALTER TABLE game_logs
 
 
 CREATE TABLE game_logs_backup AS SELECT * FROM game_logs;
+
+
+ALTER TABLE game_logs 
+ADD CONSTRAINT game_logs_unique_game 
+UNIQUE (date, player_id, team);

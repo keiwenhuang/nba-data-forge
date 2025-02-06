@@ -118,7 +118,7 @@ methodtools==0.4.7
 more-itertools==10.6.0
 msgpack==1.1.0
 multidict==6.1.0
--e git+https://github.com/keiwenhuang/nba-data-forge.git@b93b44a1473d9ba9b7ceb1fffca4509658ac92a1#egg=nba_data_forge
+-e git+https://github.com/keiwenhuang/nba-data-forge.git@cb5346ae509237038d5de0ea74a7d22ca5457a15#egg=nba_data_forge
 nest-asyncio==1.6.0
 numpy==1.26.4
 opentelemetry-api==1.29.0

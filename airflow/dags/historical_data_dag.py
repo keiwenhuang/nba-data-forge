@@ -201,7 +201,7 @@ with DAG(
     start_date=datetime(2024, 1, 1),
     catchup=False,
     tags=["nba", "historical", "game_logs"],
-    concurrency=4,  # Process 4 seasons simultaneously
+    max_active_tasks=4,  # Process 4 seasons simultaneously
 ) as tag:
 
     # pipeline start and end markers
@@ -214,21 +214,18 @@ with DAG(
             task_id=f"extract_{season}",
             python_callable=extract_season_data,
             op_kwargs={"season": season},
-            provide_context=True,
         )
 
         transform_task = PythonOperator(
             task_id=f"transform_{season}",
             python_callable=transform_season_data,
             op_kwargs={"season": season},
-            provide_context=True,
         )
 
         load_task = PythonOperator(
             task_id=f"load_{season}",
             python_callable=load_season_data,
             op_kwargs={"season": season},
-            provide_context=True,
         )
 
         # set up dependencies for this season
