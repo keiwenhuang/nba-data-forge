@@ -36,6 +36,7 @@ class GameLogTransformer(BaseTransformer):
                 result["season"] = season
 
             # Clean and standardize team/location/outcome columns
+            result["date"] = pd.to_datetime(result["date"])
             result["team"] = self._clean_column(result, "team")
             result["opponent"] = self._clean_column(result, "opponent")
             result["location"] = self._clean_column(result, "location")

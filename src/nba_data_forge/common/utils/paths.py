@@ -54,6 +54,7 @@ class PathManager:
             "archive": data_dir / "archive",
             "checkpoints": data_dir / "checkpoints",
             "sample": data_dir / "sample",
+            "test": data_dir / "test",
             # archive folders
             "raw_archive": archive_dir / "raw",
             "transformed_archive": archive_dir / "transformed",

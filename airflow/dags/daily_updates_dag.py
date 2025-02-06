@@ -36,20 +36,16 @@ dag = DAG(
 
 def extract_game_logs(**context):
     extractor = DailyGameLogExtractor()
-    current_date = context["data_interval_start"]
-    yesterday = current_date - timedelta(days=1)
+    target_date = context["data_interval_start"].date() - timedelta(days=1)  # yesterday
 
     try:
-        start_date = yesterday - timedelta(days=2)
-        end_date = yesterday
-
-        games = extractor.extract(start_date=start_date, end_date=end_date)
+        games = extractor.extract_daily(target_date)
         if games.empty:
-            log.info(f"No games found on {yesterday.date()}")
+            log.info(f"No games found on {target_date}")
             return None
 
         raw_dir = paths.get_path("raw")
-        raw_file = raw_dir / f"game_logs_{yesterday.strftime('%Y%m%d')}.csv"
+        raw_file = raw_dir / f"game_logs_{target_date.strftime('%Y%m%d')}.csv"
         games.to_csv(raw_file, index=False)
 
         log.info(f"Extracted {len(games)} game logs")

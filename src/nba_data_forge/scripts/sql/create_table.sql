@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS game_logs (
     is_home BOOLEAN NOT NULL,
     is_win BOOLEAN NOT NULL,
     minutes_played DECIMAL(10,3) NOT NULL,
-    CONSTRAINT unique_game_player_team UNIQUE (date, player_id, team, opponent)
+    CONSTRAINT unique_game_player_team UNIQUE (date, player_id, team)
 );
 
 -- Indexes

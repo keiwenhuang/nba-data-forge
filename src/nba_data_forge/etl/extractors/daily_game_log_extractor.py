@@ -48,6 +48,13 @@ class DailyGameLogExtractor(BaseExtractor):
                 )
                 self._api_delay((5, 15))
 
+    def extract_daily(self, target_date: date) -> pd.DataFrame:
+        # Calculate date range to ensure we catch all games
+        start_date = target_date - timedelta(days=1)  # One day buffer
+        end_date = target_date
+
+        return self.extract(start_date, end_date)
+
     def extract(self, start_date: date, end_date: date):
         self.logger.info(f"Extracting game logs from {start_date} to {end_date}")
 
@@ -75,7 +82,7 @@ class DailyGameLogExtractor(BaseExtractor):
                         )
                 except Exception as e:
                     self.logger.error(f"Error to process {current}: {str(e)}")
-
+                    raise
             else:
                 self.logger.info(f"Skipping {current} - already processed")
 
