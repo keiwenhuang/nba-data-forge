@@ -42,6 +42,7 @@ class PathManager:
         """Set up all project paths"""
         data_dir = self.project_root / "data"
         archive_dir = data_dir / "archive"
+        test_dir = data_dir / "test"
         return {
             "root": self.project_root,
             "config": self.project_root / "config",
@@ -55,9 +56,13 @@ class PathManager:
             "checkpoints": data_dir / "checkpoints",
             "sample": data_dir / "sample",
             "test": data_dir / "test",
+            "transformed": data_dir / "transformed",
             # archive folders
             "raw_archive": archive_dir / "raw",
             "transformed_archive": archive_dir / "transformed",
+            # test folders
+            "raw_test": test_dir / "raw",
+            "transformed_test": test_dir / "transformed",
         }
 
     def get_path(self, path_type: str) -> Path:

@@ -12,12 +12,13 @@ from nba_data_forge.common.utils.paths import paths
 
 
 class BaseExtractor(ABC):
-    def __init__(self, base_url="https://www.basketball-reference.com"):
+    def __init__(self, base_url="https://www.basketball-reference.com", test=False):
         self.base_url = base_url
         self.checkpoint_manager = CheckpointManager()
         self.logger = setup_logger(
             name=self.__class__.__name__, log_dir=paths.get_path("logs")
         )
+        self.test = test
 
     def save_checkpoint(self, identifier: str, data: Dict[str, any]) -> None:
         self.checkpoint_manager.save(identifier, data, self.logger)

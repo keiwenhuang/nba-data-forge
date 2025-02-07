@@ -11,19 +11,6 @@ class DailyGameLogExtractor(BaseExtractor):
         super().__init__()
         self.max_retries = max_retries
 
-    def _load_progress(self) -> set:
-        """Load all processed dates from checkpoint"""
-        checkpoint = self.load_checkpoint("daily_progress")
-        if checkpoint:
-            return set(checkpoint.get("processed_dates", []))
-        return set()
-
-    def _save_progress(self, processed_dates: set):
-        """Save processed dates to checkpoint"""
-        self.save_checkpoint(
-            "daily_progress", {"processed_dates": list(processed_dates)}
-        )
-
     def _get_game_logs_by_date(self, date: date):
         for attempt in range(self.max_retries):
             try:
@@ -49,8 +36,8 @@ class DailyGameLogExtractor(BaseExtractor):
                 self._api_delay((5, 15))
 
     def extract_daily(self, target_date: date) -> pd.DataFrame:
-        # Calculate date range to ensure we catch all games
-        start_date = target_date - timedelta(days=1)  # One day buffer
+        # extracting two days range of data to catch missed or updated data
+        start_date = target_date - timedelta(days=1)
         end_date = target_date
 
         return self.extract(start_date, end_date)
@@ -59,32 +46,25 @@ class DailyGameLogExtractor(BaseExtractor):
         self.logger.info(f"Extracting game logs from {start_date} to {end_date}")
 
         # Load global progress
-        processed_dates = self._load_progress()
         all_games = []
 
         current = start_date
         while current <= end_date:
-            if current.isoformat() not in processed_dates:
-                try:
-                    self.logger.info(f"Processing data: {current}")
-                    daily_games = self._get_game_logs_by_date(current)
+            try:
+                self.logger.info(f"Processing data: {current}")
+                daily_games = self._get_game_logs_by_date(current)
 
-                    if daily_games:
-                        for game in daily_games:
-                            game["date"] = current
-                        all_games.extend(daily_games)
+                if daily_games:
+                    for game in daily_games:
+                        game["date"] = current
+                    all_games.extend(daily_games)
 
-                        processed_dates.add(current.isoformat())
-                        self._save_progress(processed_dates)
-
-                        self.logger.info(
-                            f"Successfully processed {current}: {len(daily_games)}"
-                        )
-                except Exception as e:
-                    self.logger.error(f"Error to process {current}: {str(e)}")
-                    raise
-            else:
-                self.logger.info(f"Skipping {current} - already processed")
+                    self.logger.info(
+                        f"Successfully processed {current}: {len(daily_games)}"
+                    )
+            except Exception as e:
+                self.logger.error(f"Error to process {current}: {str(e)}")
+                raise
 
             current += timedelta(days=1)
 

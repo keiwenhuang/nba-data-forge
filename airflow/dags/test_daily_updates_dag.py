@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 import pandas as pd
-import pendulum
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
@@ -25,7 +24,7 @@ default_args = {
 
 
 dag = DAG(
-    "nba_daily_updates",
+    "test_nba_daily_updates",
     default_args=default_args,
     description="NBA current season game log updates",
     schedule="0 18 * * *",  # Changed from schedule_interval to schedule
@@ -34,36 +33,20 @@ dag = DAG(
     tags=["nba", "daily"],
 )
 
-# Set Pacific timezone
-local_tz = pendulum.timezone("America/Los_Angeles")
-
-
-def get_pacific_yesterday():
-    # Get current time in Pacific
-    now_pacific = datetime.now(local_tz)
-
-    # Get yesterday's date in Pacific
-    pacific_yesterday = now_pacific.date() - timedelta(days=1)
-
-    return pacific_yesterday.strftime("%Y-%m-%d")
-
 
 def extract_game_logs(ti):
-    extractor = DailyGameLogExtractor()
-
-    # target fectching is from yesterday and the day before
-    target_date = get_pacific_yesterday()
+    extractor = DailyGameLogExtractor(test=True)
+    target_date = datetime(2025, 2, 5) - timedelta(days=1)  # fetching 2/3 - 2/4
 
     try:
-        games = extractor.extract_daily(
-            datetime.strptime(target_date, "%Y-%m-%d").date()
-        )
+        log.info(f"Getting data on {target_date}")
+        games = extractor.extract_daily(target_date)
         if games.empty:
             log.info(f"No games fetched on {target_date}")
             return None
 
-        raw_dir = paths.get_path("raw")
-        raw_file = raw_dir / f"game_logs_{target_date}.csv"
+        raw_dir = paths.get_path("raw_test")
+        raw_file = raw_dir / f"game_logs_{target_date.strftime('%Y%m%d')}.csv"
 
         games.to_csv(raw_file, index=False)
 
@@ -79,7 +62,7 @@ def extract_game_logs(ti):
 
 def transform_game_logs(ti):
     try:
-        raw_file = ti.xcom_pull(task_ids="extract_games", key="raw_file")
+        raw_file = ti.xcom_pull(task_ids="test_extract_games", key="raw_file")
         log.info(f"Pulled from XCom: {raw_file}")
 
         if raw_file is None:
@@ -91,7 +74,7 @@ def transform_game_logs(ti):
         transformed_df = transformer.transform(raw_df)
 
         # save transformed data
-        processed_dir = paths.get_path("transformed")
+        processed_dir = paths.get_path("transformed_test")
         transformed_file = processed_dir / f"{Path(raw_file).stem}_transformed.csv"
         transformed_df.to_csv(transformed_file, index=False)
 
@@ -108,14 +91,14 @@ def transform_game_logs(ti):
 def load_game_logs(ti):
     try:
         transformed_file = ti.xcom_pull(
-            task_ids="transform_games", key="transformed_file"
+            task_ids="test_transform_games", key="transformed_file"
         )
         if not transformed_file:
             log.info("No data to load")
             return None
 
         df = pd.read_csv(transformed_file)
-        loader = DatabaseLoader()
+        loader = DatabaseLoader(test=True)
 
         # Use upsert to handle potential duplicates
         rows_affected = loader.upsert(
@@ -124,26 +107,29 @@ def load_game_logs(ti):
             unique_columns=["date", "player_id", "team"],
         )
 
-        # Get archive directories for raw and transformed files
-        raw_archive_dir = paths.get_path("raw_archive")
-        transformed_archive_dir = paths.get_path("transformed_archive")
+        # DO NOT MOVE FILES IN TEST ENVIRONMENT
+        # # Get archive directories for raw and transformed files
+        # raw_archive_dir = paths.get_path("raw_archive")
+        # transformed_archive_dir = paths.get_path("transformed_archive")
 
-        # Archive raw file
-        raw_file = ti.xcom_pull(task_ids="extract_games", key="raw_file")
-        if raw_file:
-            source_path = Path(raw_file)
-            if source_path.exists():
-                archive_path = raw_archive_dir / source_path.name
-                source_path.rename(archive_path)
-                log.info(f"Archived raw file to {archive_path}")
+        # # Archive raw file
+        # raw_file = context["task_instance"].xcom_pull(
+        #     task_ids="extract_games", key="raw_file"
+        # )
+        # if raw_file:
+        #     source_path = Path(raw_file)
+        #     if source_path.exists():
+        #         archive_path = raw_archive_dir / source_path.name
+        #         source_path.rename(archive_path)
+        #         log.info(f"Archived raw file to {archive_path}")
 
-        # Archive transformed file
-        if transformed_file:
-            source_path = Path(transformed_file)
-            if source_path.exists():
-                archive_path = transformed_archive_dir / source_path.name
-                source_path.rename(archive_path)
-                log.info(f"Archived transformed file to {archive_path}")
+        # # Archive transformed file
+        # if transformed_file:
+        #     source_path = Path(transformed_file)
+        #     if source_path.exists():
+        #         archive_path = transformed_archive_dir / source_path.name
+        #         source_path.rename(archive_path)
+        #         log.info(f"Archived transformed file to {archive_path}")
 
         log.info(f"Loaded {rows_affected} games to database")
         return rows_affected
@@ -156,9 +142,9 @@ def load_game_logs(ti):
 def validate_daily_games(ti):
     """Validate the loaded data."""
     try:
-        loader = DatabaseLoader()
-        yesterday = get_pacific_yesterday()
-        prev_date = datetime.strptime(yesterday, "%Y-%m-%d").date() - timedelta(days=1)
+        loader = DatabaseLoader(test=True)
+        yesterday = datetime(2025, 2, 5) - timedelta(days=1)
+        prev_date = yesterday - timedelta(days=1)
         dates_to_check = [prev_date, yesterday]
 
         total_games_count = 0
@@ -183,7 +169,7 @@ def validate_daily_games(ti):
 
         # Get expected count from transform task
         expected_count = ti.xcom_pull(
-            task_ids="transform_games", key="len_transformed_file"
+            task_ids="test_transform_games", key="len_transformed_file"
         )
 
         if expected_count is None:
@@ -211,20 +197,24 @@ def validate_daily_games(ti):
 
 # define tasks
 extract_games = PythonOperator(
-    task_id="extract_games", python_callable=extract_game_logs, dag=dag
+    task_id="test_extract_games", python_callable=extract_game_logs, dag=dag
 )
 
 transform_games = PythonOperator(
-    task_id="transform_games", python_callable=transform_game_logs, dag=dag
+    task_id="test_transform_games", python_callable=transform_game_logs, dag=dag
 )
 
 load_games = PythonOperator(
-    task_id="load_games", python_callable=load_game_logs, dag=dag
+    task_id="test_load_games", python_callable=load_game_logs, dag=dag
 )
 
 validate_games = PythonOperator(
-    task_id="validate_games", python_callable=validate_daily_games, dag=dag
+    task_id="test_validate_games", python_callable=validate_daily_games, dag=dag
 )
 
 # Set task dependencies
 extract_games >> transform_games >> load_games >> validate_games
+
+
+# if __name__ == "__main__":
+#     dag.test()

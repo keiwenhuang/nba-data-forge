@@ -18,6 +18,8 @@ class GameLogProcessor:
         self.logger = setup_logger(__class__.__name__, log_dir=paths.get_path("logs"))
 
     def _get_raw_files(self):
+        if self.test:
+            return list(paths.get_path("raw_test").glob("game_logs_*.csv"))
         return list(paths.get_path("raw").glob("game_logs_*.csv"))
 
     def process_file(self, file_path: Path):
@@ -80,7 +82,7 @@ class GameLogProcessor:
 
 
 def main():
-    processor = GameLogProcessor(test=False)
+    processor = GameLogProcessor(test=True)
     results = processor.process_all_files()
 
     # Print summary
