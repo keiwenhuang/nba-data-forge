@@ -4,7 +4,7 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 
 from alembic import context
-from src.models.game_log import Base
+from nba_data_forge.api.models.game_log import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -13,7 +13,7 @@ config = context.config
 
 def get_url():
     config = ConfigParser()
-    config.read("./config/database.ini")
+    config.read("./config.ini")
     db = config["postgresql"]
     return f"postgresql://{db['user']}:{db['password']}@{db['host']}:{db['port']}/{db['database']}"
 
