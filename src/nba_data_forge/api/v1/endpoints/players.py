@@ -36,7 +36,7 @@ async def list_players(
 async def get_player(
     player_id: str,
     season: int | None = Query(
-        default=None, description="Filter stats by season", ge=2003, le=2024
+        default=None, description="Filter stats by season", ge=2003, le=2025
     ),
     db: Session = Depends(get_session),
 ) -> PlayerDetail:
@@ -45,7 +45,7 @@ async def get_player(
 
     Args:
         player_id: Player's unique identifier
-        season: Optional season filter (2003-2024)
+        season: Optional season filter (2003-2025)
         db: Database session
 
     Returns:
