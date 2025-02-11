@@ -6,7 +6,9 @@ Flask_AppBuilder==4.5.2
 numpy==1.26.4
 pandas==2.1.4
 pendulum==3.0.0
+plotly==6.0.0
 pydantic==2.10.5
 pytest==8.3.4
 Requests==2.32.3
+streamlit==1.42.0
 SQLAlchemy==1.4.54
