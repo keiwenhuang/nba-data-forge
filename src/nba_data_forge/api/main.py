@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from nba_data_forge.api.v1 import v1_router
+from nba_data_forge.api.v1 import router
 
 app = FastAPI(
     title="NBA Data Forge",
@@ -14,7 +14,7 @@ def root():
     return {"Hello": "World"}
 
 
-app.include_router(v1_router)
+app.include_router(router, prefix="/api")
 
 
 @app.get("/health")
