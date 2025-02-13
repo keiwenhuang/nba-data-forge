@@ -14,6 +14,12 @@ Base = declarative_base()
 
 
 class GameLog(Base):
+    def to_dict(self):
+        """Convert model instance to dictionary."""
+        return {
+            column.name: getattr(self, column.name) for column in self.__table__.columns
+        }
+
     __tablename__ = "game_logs"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
