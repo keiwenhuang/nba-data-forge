@@ -15,3 +15,13 @@ class CommonQueryParams(BaseModel):
         None, description="Filter games until this date (YYYY-MM-DD)"
     )
     last_n_games: int | None = Query(None, description="Get only the last N games")
+
+
+class GameFilters(CommonQueryParams):
+    """Game filters including opponent and game outcome."""
+
+    opponent: str | None = Query(
+        default=None, description="Opponent team abbreviation (e.g., 'LAL')"
+    )
+    is_home: bool | None = Query(default=None, description="Filter for home games")
+    is_win: bool | None = Query(default=None, description="Filter for wins")

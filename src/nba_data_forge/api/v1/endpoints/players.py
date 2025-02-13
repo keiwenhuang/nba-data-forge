@@ -1,85 +1,71 @@
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import distinct
 from sqlalchemy.orm import Session
 
-from nba_data_forge.api.dependencies.filters import CommonQueryParams
-from nba_data_forge.api.dependencies.query_utils import (
-    apply_common_filters,
-    check_record_exists,
-)
-from nba_data_forge.api.models.game_log import GameLog as GameLogModel
-from nba_data_forge.api.schemas.game_log import GameLog as GameLogSchema
-from nba_data_forge.api.schemas.players import PlayerDetail, PlayerList
-from nba_data_forge.api.services.player_service import PlayerService
+from nba_data_forge.api.dependencies.filters import GameFilters
+from nba_data_forge.api.schemas.players import PlayerBase, PlayerGameResponse
+from nba_data_forge.api.services.player_stats_service import PlayerStatsService
 from nba_data_forge.common.db.database import get_session
 
 router = APIRouter()
 
 
-@router.get("/", response_model=PlayerList)
+@router.get("/", response_model=List[PlayerBase])
 async def list_players(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=1000),
+    season: int = Query(..., ge=2004, le=2025, description="NBA season year"),
     db: Session = Depends(get_session),
-) -> PlayerList:
-    """
-    Get list of all players with pagination.
-    """
-    service = PlayerService(db)
-    players, total = service.get_player_list(skip=skip, limit=limit)
-    return PlayerList(items=players, total=total)
+) -> List[PlayerBase]:
+    """Get list of all players for a specific season."""
+
+    service = PlayerStatsService(db)
+    return service.get_players_by_season(season)
 
 
-@router.get("/{player_id}", response_model=PlayerDetail)
-async def get_player(
+@router.get("/{player_id}/games", response_model=PlayerGameResponse)
+async def get_player_games(
     player_id: str,
-    season: int | None = Query(
-        default=None, description="Filter stats by season", ge=2003, le=2025
-    ),
+    filters: GameFilters = Depends(),
     db: Session = Depends(get_session),
-) -> PlayerDetail:
+) -> PlayerGameResponse:
     """
-    Get player's information and statistics.
+    Get player's games with optional filters.
 
-    Args:
-        player_id: Player's unique identifier
-        season: Optional season filter (2003-2025)
-        db: Database session
-
-    Returns:
-        PlayerDetail: Player information with career and optional season statistics
+    If no season is specified, returns games from current season.
+    Use filters to:
+    - Get specific season games (season)
+    - Get games against specific opponent (opponent)
+    - Filter by home/away games (is_home)
+    - Filter by wins/losses (is_win)
+    - Limit number of returned games (last_n_games)
     """
-    service = PlayerService(db)
 
-    # Get player info
-    player_info = service.get_player_info(player_id)
-    if not player_info:
-        raise HTTPException(
-            status_code=404, detail=f"Player with ID {player_id} not found"
-        )
+    service = PlayerStatsService(db)
 
-    # Get career stats
-    career_stats = service.get_player_stats(player_id)
-    if not career_stats:
-        raise HTTPException(
-            status_code=404, detail=f"Statistics not found for player {player_id}"
-        )
+    # If no season specified, use current season
+    season = filters.season or service.current_season
 
-    # Get season stats if requested
-    season_stats = None
-    if season:
-        season_stats = service.get_player_stats(player_id, season)
-        if not season_stats:
-            raise HTTPException(
-                status_code=404,
-                detail=f"No stats found for player {player_id} in season {season}",
-            )
-
-    return PlayerDetail(
-        player_id=player_info["player_id"],
-        name=player_info["name"],
-        career_stats=career_stats,
-        season_stats=season_stats,
+    averages, games = service.get_player_games(
+        player_id=player_id,
+        season=season,
+        opponent_abbrev=filters.opponent.upper() if filters.opponent else None,
+        is_home=filters.is_home,
+        is_win=filters.is_win,
+        n=filters.last_n_games or 10,  # Default to 10 games if not specified
     )
+
+    if not games:
+        detail = f"No games found for player {player_id}"
+        if filters.opponent:
+            detail += f" vs {filters.opponent}"
+        if filters.season:
+            detail += f" in season {filters.season}"
+        else:
+            detail += " in current season"
+        if filters.is_home is not None:
+            detail += f" {'at home' if filters.is_home else 'away'}"
+        if filters.is_win is not None:
+            detail += f" ({('wins' if filters.is_win else 'losses')})"
+        raise HTTPException(status_code=404, detail=detail)
+
+    return PlayerGameResponse(averages=averages, games=games)
