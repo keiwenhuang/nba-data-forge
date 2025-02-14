@@ -80,7 +80,7 @@ class PlayerStatsService:
         opponent_abbrev: str | None = None,
         is_win: bool | None = None,
         is_home: bool | None = None,
-        n: int = 10,
+        n: int | None = None,
     ) -> Tuple[Dict, List[Dict]]:
         """Get player's games with optional filters."""
 

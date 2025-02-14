@@ -42,17 +42,22 @@ async def get_player_games(
 
     service = PlayerStatsService(db)
 
-    # If no season specified, use current season
-    season = filters.season or service.current_season
+    # If opponent specified, ignore season filter
+    params = {
+        "player_id": player_id,
+        "is_home": filters.is_home,
+        "is_win": filters.is_win,
+    }
 
-    averages, games = service.get_player_games(
-        player_id=player_id,
-        season=season,
-        opponent_abbrev=filters.opponent.upper() if filters.opponent else None,
-        is_home=filters.is_home,
-        is_win=filters.is_win,
-        n=filters.last_n_games or 10,  # Default to 10 games if not specified
-    )
+    if filters.opponent:
+        params["opponent_abbrev"] = filters.opponent.upper()
+        params["n"] = filters.last_n_games.upper()
+
+    else:
+        # Only use season filter if no opponent specified
+        params["season"] = filters.season or service.current_season
+
+    averages, games = service.get_player_games(**params)
 
     if not games:
         detail = f"No games found for player {player_id}"

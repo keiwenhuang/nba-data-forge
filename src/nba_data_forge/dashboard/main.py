@@ -1,69 +1,59 @@
-import logging
-from typing import Dict, List
-
-import pandas as pd
-import plotly.graph_objects as go
-import requests
 import streamlit as st
 
-from nba_data_forge.dashboard.client import DataClient
+from nba_data_forge.dashboard.api_client import APIClient
+from nba_data_forge.dashboard.components.filters import (
+    LastNGamesFilter,
+    OpponentFilter,
+    PlayerFilter,
+    SeasonFilter,
+)
+from nba_data_forge.dashboard.components.stats import AverageStats, RecentGameLogs
 
 
-class Dashboard:
-    def __init__(self):
-        self.client = DataClient()
+def main():
+    st.set_page_config(page_title="NBA Stats Dashboard", page_icon="🏀", layout="wide")
 
-    def create_stats_table(self, stats: Dict):
-        col1, col2, col3 = st.columns(3)
+    st.title("NBA Player Statistics Dashboard")
+    client = APIClient()
 
-        with col1:
-            st.metric("Points", f"{stats["points_per_game"]:.1f}")
-            st.metric("Rebounds", f"{stats["rebounds_per_game"]:.1f}")
-            st.metric("Assists", f"{stats["assists_per_game"]:.1f}")
+    with st.sidebar:
+        st.header("Filters")
+        with st.spinner("Loading filters..."):
+            season = SeasonFilter().render()
+            player = PlayerFilter(season=season, client=client).render()
+            opponent = OpponentFilter(client=client).render()
+            last_n_games = LastNGamesFilter(client=client).render()
 
-        with col2:
-            st.metric("Steals", f"{stats["steals_per_game"]:.1f}")
-            st.metric("Blocks", f"{stats["blocks_per_game"]:.1f}")
+    if player:
+        row1, row2, row3 = st.container(), st.container(), st.container()
 
-        with col3:
-            st.metric("Minutes", f"{stats["minutes_per_game"]:.1f}")
-            st.metric("Games Played", f"{stats["games_played"]}")
+        # Season averages
+        with row1:
+            AverageStats(
+                player_id=player,
+                season=season,
+                client=client,
+            ).render()
 
-    def run(self):
-        """Main dashboard application."""
-        st.title("NBA Data Forge Dashboard 🏀")
+        # Last N games averages
+        with row2:
+            AverageStats(
+                player_id=player,
+                season=season,
+                opponent=opponent,
+                last_n_games=last_n_games,
+                client=client,
+            ).render()
 
-        # Sidebar - Player Selection
-        st.sidebar.title("Player Selection")
-        players = self.client.get_players()
-        player_names = [p["name"] for p in players]
-        selected_player_name = st.sidebar.selectbox("Select Player", player_names)
-
-        # Get selected player ID
-        selected_player = next(p for p in players if p["name"] == selected_player_name)
-        player_id = selected_player["player_id"]
-
-        # Season selection
-        seasons = list(range(2024, 2003, -1))
-        selected_season = st.sidebar.selectbox(
-            "Select Season",
-            [None] + seasons,
-            format_func=lambda x: "All Seasons" if x is None else str(x),
-        )
-
-        # Main content
-        stats = self.client.get_player_stats(player_id, selected_season)
-
-        # Display player stats
-        st.header(f"{selected_player_name}'s Statistics")
-        st.subheader(
-            "Career Averages"
-            if not selected_season
-            else f"{selected_season} Season Averages"
-        )
-        self.create_stats_table(stats["career_stats"])
+        with row3:
+            RecentGameLogs(
+                player_id=player,
+                season=season,
+                opponent=opponent,
+                last_n_games=last_n_games,
+                client=client,
+            ).render()
 
 
 if __name__ == "__main__":
-    dashboard = Dashboard()
-    dashboard.run()
+    main()
