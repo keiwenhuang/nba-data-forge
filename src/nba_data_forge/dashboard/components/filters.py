@@ -42,5 +42,5 @@ class OpponentFilter:
 class LastNGamesFilter:
     client: "APIClient"
 
-    def render(self) -> str | None:
+    def render(self) -> int | None:
         return st.selectbox("Last N Games", range(3, 82, 5))

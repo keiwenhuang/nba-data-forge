@@ -73,14 +73,12 @@ class PlayerStatsService:
 
         return averages_query.first()._asdict()
 
-    def get_player_games(
+    def get_season_games(
         self,
         player_id: str,
         season: int | None = None,
-        opponent_abbrev: str | None = None,
         is_win: bool | None = None,
         is_home: bool | None = None,
-        n: int | None = None,
     ) -> Tuple[Dict, List[Dict]]:
         """Get player's games with optional filters."""
 
@@ -91,7 +89,39 @@ class PlayerStatsService:
         else:
             conditions.append(GameLog.season == season)
 
-        if opponent_abbrev:
+        if is_win is not None:
+            conditions.append(GameLog.is_win == is_win)
+        if is_home is not None:
+            conditions.append(GameLog.is_home == is_home)
+
+        query = (
+            self.db.query(GameLog)
+            .filter(and_(*conditions))
+            .order_by(GameLog.date.desc())
+        )
+
+        games = query.all()
+
+        if not games:
+            return {"games_played": 0}, []
+
+        averages = self._calculate_averages([g.id for g in games])
+        averages["games_played"] = len(games)  # Add games_played count
+        return averages, [game.to_dict() for game in games]
+
+    def get_opponent_stats(
+        self,
+        player_id: str,
+        opponent_abbrev: str | None = None,
+        is_win: bool | None = None,
+        is_home: bool | None = None,
+        last_n_games: int | None = None,
+    ) -> Tuple[Dict, List[Dict]]:
+        """Get player's games with optional filters."""
+
+        conditions = [GameLog.player_id == player_id]
+
+        if opponent_abbrev is not None:
             conditions.append(GameLog.opponent_abbrev == opponent_abbrev)
         if is_win is not None:
             conditions.append(GameLog.is_win == is_win)
@@ -104,8 +134,8 @@ class PlayerStatsService:
             .order_by(GameLog.date.desc())
         )
 
-        if n:
-            query = query.limit(n)
+        if last_n_games:
+            query = query.limit(last_n_games)
 
         games = query.all()
 

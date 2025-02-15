@@ -23,7 +23,7 @@ class PlayerBase(BaseSchema):
     name: str = Field(description="Player's full name")
 
 
-class PlayerAverages(BaseSchema):
+class PlayerAverageStats(BaseSchema):
     """Schema for player's average statistics."""
 
     avg_points: Decimal | None = Field(
@@ -122,12 +122,12 @@ class PlayerGameStats(BaseSchema):
     plus_minus: Decimal
 
 
-class PlayerStats(BaseSchema):
-    """Schema for player statistics response."""
+# class PlayerStats(BaseSchema):
+#     """Schema for player statistics response."""
 
-    player: PlayerBase
-    averages: PlayerAverages
-    games: List[PlayerGameStats]
+#     player: PlayerBase
+#     averages: PlayerAverageStats
+#     games: List[PlayerGameStats]
 
 
 class PlayerSeasonStats(BaseSchema):
@@ -135,12 +135,12 @@ class PlayerSeasonStats(BaseSchema):
 
     player: PlayerBase
     season: int
-    averages: PlayerAverages
+    averages: PlayerAverageStats
     games: List[PlayerGameStats]
 
 
 class PlayerGameResponse(BaseSchema):
     """Schema for game response including averages and game details."""
 
-    averages: PlayerAverages
+    averages: PlayerAverageStats
     games: List[PlayerGameStats]

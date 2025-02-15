@@ -7,13 +7,17 @@ from nba_data_forge.dashboard.components.filters import (
     PlayerFilter,
     SeasonFilter,
 )
-from nba_data_forge.dashboard.components.stats import AverageStats, RecentGameLogs
+from nba_data_forge.dashboard.components.stats import (
+    RecentGameLogs,
+    RecentGameStats,
+    SeasonAverage,
+)
 
 
 def main():
-    st.set_page_config(page_title="NBA Stats Dashboard", page_icon="🏀", layout="wide")
+    st.set_page_config(page_title="NBA Data Forge", page_icon="🏀", layout="wide")
 
-    st.title("NBA Player Statistics Dashboard")
+    st.title("NBA Data Forge Dashboard")
     client = APIClient()
 
     with st.sidebar:
@@ -21,7 +25,7 @@ def main():
         with st.spinner("Loading filters..."):
             season = SeasonFilter().render()
             player = PlayerFilter(season=season, client=client).render()
-            opponent = OpponentFilter(client=client).render()
+            opponent_abbrev = OpponentFilter(client=client).render()
             last_n_games = LastNGamesFilter(client=client).render()
 
     if player:
@@ -29,7 +33,7 @@ def main():
 
         # Season averages
         with row1:
-            AverageStats(
+            SeasonAverage(
                 player_id=player,
                 season=season,
                 client=client,
@@ -37,10 +41,11 @@ def main():
 
         # Last N games averages
         with row2:
-            AverageStats(
+            RecentGameStats(
                 player_id=player,
-                season=season,
-                opponent=opponent,
+                opponent_abbrev=(
+                    opponent_abbrev if opponent_abbrev is not "All" else None
+                ),
                 last_n_games=last_n_games,
                 client=client,
             ).render()
@@ -48,8 +53,9 @@ def main():
         with row3:
             RecentGameLogs(
                 player_id=player,
-                season=season,
-                opponent=opponent,
+                opponent_abbrev=(
+                    opponent_abbrev if opponent_abbrev is not "All" else None
+                ),
                 last_n_games=last_n_games,
                 client=client,
             ).render()
