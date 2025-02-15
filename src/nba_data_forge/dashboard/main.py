@@ -26,7 +26,7 @@ def main():
             season = SeasonFilter().render()
             player = PlayerFilter(season=season, client=client).render()
             opponent_abbrev = OpponentFilter(client=client).render()
-            last_n_games = LastNGamesFilter(client=client).render()
+            last_n_games = LastNGamesFilter().render()
 
     if player:
         row1, row2, row3 = st.container(), st.container(), st.container()

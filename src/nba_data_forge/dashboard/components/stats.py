@@ -5,8 +5,14 @@ import streamlit as st
 
 
 @dataclass
-class SeasonAverage:
+class BaseStatsComponent:
+    """Base class for stats components"""
+
     client: "APIClient"
+
+
+@dataclass
+class SeasonAverage(BaseStatsComponent):
     player_id: str
     season: int | None = None
 
@@ -51,8 +57,7 @@ class SeasonAverage:
 
 
 @dataclass
-class RecentGameStats:
-    client: "APIClient"
+class RecentGameStats(BaseStatsComponent):
     player_id: str
     opponent_abbrev: str | None = None
     last_n_games: int | None = None
@@ -105,8 +110,7 @@ class RecentGameStats:
 
 
 @dataclass
-class RecentGameLogs:
-    client: "APIClient"
+class RecentGameLogs(BaseStatsComponent):
     player_id: str
     opponent_abbrev: str | None = None
     last_n_games: int | None = None
