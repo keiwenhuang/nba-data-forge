@@ -23,7 +23,7 @@ async def list_players(
 
 
 @router.get("/{player_id}/season/{season}", response_model=PlayerGameResponse)
-async def get_player_games(
+async def get_season_games(
     player_id: str,
     season: int,
     filters: SeasonFilters = Depends(),
@@ -57,7 +57,7 @@ async def get_player_games(
 
 
 @router.get("/{player_id}/vs-opponent-stats", response_model=PlayerGameResponse)
-async def get_player_games(
+async def get_opponent_games(
     player_id: str,
     filters: OpponentFilters = Depends(),
     db: Session = Depends(get_session),

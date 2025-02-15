@@ -1,10 +1,9 @@
-from datetime import date
-
 from fastapi import Query
 from pydantic import BaseModel
 
 
 class GameFilters(BaseModel):
+
     is_home: bool | None = Query(default=None, description="Filter for home games")
     is_win: bool | None = Query(default=None, description="Filter for wins")
 
