@@ -163,3 +163,29 @@ For educational and demonstration purposes only. Not affiliated with or endorsed
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Testing Implementation
+The project implements comprehensive testing across all layers:
+### Test Structure
+```
+tests/
+├── conftest.py                 # Test configuration and fixtures
+├── test_player_stats.py        # API service tests
+├── test_create_table.py        # Database schema tests
+├── test_database.py            # Database connection tests
+├── test_transformer.py         # Data transformation tests
+└── test_upsert_functionality.py # Database operations tests
+```
+### Key Testing Features
+- Database transaction isolation for tests
+- Comprehensive fixture system
+- Detailed service layer testing
+- ETL pipeline validation
+- Data integrity verification
+
+### Test Coverage
+- API endpoint validation
+- Data transformation verification
+- Database operation testing
+- Player statistics calculation
+- Error handling scenarios
