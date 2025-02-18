@@ -1,177 +1,165 @@
 # NBA Data Forge
 
-A portfolio project showcasing data engineering and backend development through NBA statistics analysis.
+A data engineering portfolio project showcasing ETL pipeline development, API implementation, and data visualization.
+
+![alt text](screenshots/dashboard.png)
 
 ## Project Overview
-NBA Data Forge is a comprehensive data platform demonstrating:
 
-- Historical NBA data collection (2003-2024)
-- Automated data engineering pipeline with Airflow
-- RESTful API with analytics capabilities
-- Robust error handling and recovery systems
-
-### Data Sources & Disclaimer
-This project uses data from:
-- [Basketball Reference](https://www.basketball-reference.com/) - Historical player and game data
-- [basketball_reference_web_scraper](https://jaebradley.github.io/basketball_reference_web_scraper/) - Python client for Basketball Reference data
-
-**Data Usage Disclaimer:**  
-All NBA data used in this project is sourced from Basketball Reference for educational and demonstration purposes only. This project is not affiliated with or endorsed by Basketball Reference, the NBA, or any NBA teams. Please refer to Basketball Reference's terms of use for information about data usage rights and limitations.
-
-
-## Current Project Status
-
-### Completed
-- Project structure and environment setup
-- Data collection infrastructure with error handling
-- Initial data quality analysis (523,825 game logs, 2003-2024)
-- Database schema design and implementation
-- Development environment with Docker and Airflow
-- Data transformation pipeline implementation
-- Team name and location standardization
-- Data validation system
-- Loading optimization
-
-### In Progress
-- API endpoint implementation
-- Advanced analytics features
-- Incremental update system
-
-### Planned
-- Performance optimization
-
-## Technical Implementation
-### Data Structure
-#### Player Data
-```
-player_id,name,year_min,year_max,position,height,weight,birth_date,college,is_active
-```
-Note: `is_active` status is determined during data collection from Basketball Reference
-
-#### GameLogs
-```
-date,team,location,opponent,outcome,seconds_played,points_scored,game_score,plus_minus,player_id
-```
-Enriched fields:
-- player_id and name (added during collection)
-- is_home, is_win (boolean flags)
-- minutes_played (converted from seconds)
-- team_abbrev, opponent_abbrev (match to current team name abbreviations)
-
-
-### Technical Stack
-- **Backend Framework**: FastAPI
-- **Database**: PostgreSQL
-- **ETL**: Apache Airflow
-- **ORM**: SQLAlchemy
-- **Data Collection**: BeautifulSoup, basketball_reference_web_scraper
-- **Data Processing**: Pandas, NumPy
-- **Schema Validation**: Pydantic
-- **Development Tools**: pytest, Git
-
-### Project Structure
-```
-nba_data_forge/
-├── src/                          
-│   └── nba_data_forge/             
-│       ├── api/                    
-│       │   ├── dependencies/       # FastAPI dependencies
-│       │   ├── models/             # SQLAlchemy models             
-│       │   ├── schemas/            # Pydantic schemas 
-│       │   ├── services/           # Business logic
-│       │   └── v1/                 # API v1 endpoints
-│       ├── common/                 # Shared code
-│       │   ├── config/             # Configuration management
-│       │   ├── db/                 # Database utilities
-│       │   └── utils/              # Shared utilities
-│       └── etl/                    # ETL pipeline
-│           ├── extractors/         # Data collection
-│           ├── loaders/            # Database loading
-│           └── transformers/       # Data processing
-├── tests/                          # Integration tests
-└── airflow/                        # Airflow configuration
-    └── dags/                       # Airflow DAG definitions
-```
+NBA Data Forge demonstrates data engineering practices through:
+- ETL pipeline with Airflow for NBA game statistics processing
+- RESTful API with FastAPI for data access
+- Interactive dashboard using Streamlit
+- PostgreSQL database with SQLAlchemy ORM
 
 ## Features
-### Data Collection
+
+### Data Pipeline
 ```
-# Collect player data
-python data_collection.py --players
-
-# Collect game logs for specific seasons
-python data_collection.py --game-logs --from-season 2019 --to-season 2022
+extract_games >> transform_games >> load_games >> validate_games
 ```
-Key features:
-- Web scraping with rate limiting
-- Season-based collection
-- Checkpoint recovery system
-- Rotating logs (10MB, 5 backups)
-- Data validation
 
-### API Endpoints
-- `/api/v1/players` - Player statistics with filtering capabilities
-- `/api/v1/teams` - Team-level statistics 
-- `/api/v1/game_logs` - Detailed game-by-game data
-- `/api/v1/boxscores` - Daily box score summaries
+- **Historical Data Collection**
+  - Rate-limited API requests with retry logic
+  - Checkpoint system for resumable collection
+  - Data validation and error handling
+  - Progress tracking and recovery
 
-Features:
-- Season-based filtering
-- Date range queries
-- Last N games analysis
-- Team statistics aggregation
-- Daily box score compilation
+- **Incremental Updates**
+  - Airflow DAG for automation
+  - Efficient upsert pattern for updates
+  - Multi-stage validation
+  - File archiving system
 
-## Development Setup
+### API Implementation
+
+Simple yet powerful endpoints for accessing NBA statistics:
+
+
+`GET /api/v1/players/`
+- List players for a given season (2004-2025)
+
+`GET /api/v1/players/{player_id}/season/{season}`
+- Get player's season statistics with optional home/away and win/loss filters
+
+`GET /api/v1/players/{player_id}/vs-opponent-stats`
+- Get player's statistics with opponent and recent game filters
+
+
+### Interactive Dashboard
+
+The Streamlit dashboard provides an interactive interface to explore player statistics across different contexts:
+
+#### Filters
+- Season selection (2004-2025)
+- Player selection
+- Opponent filter
+- Last N games selection (3-82)
+
+#### Statistics Views
+
+1. Season Averages
+    - Points, minutes, field goals
+    - Three-point shots
+    - Free throws and other key stats
+
+2. VS Specific Team Analysis
+    - Last N games averages against selected opponent
+    - Detailed shooting and scoring statistics
+
+3. Game Logs
+    - Date, team, and opponent
+    - Home/away and win/loss indicators
+    - Minutes played
+    - Complete game statistics
+
+## Technical Stack
+
+- **Backend**: FastAPI, PostgreSQL, SQLAlchemy
+- **ETL**: Apache Airflow, Pandas
+- **Frontend**: Streamlit
+- **Development**: Python 3.12+, Docker
+
+## Project Structure
+
+```
+nba_data_forge/
+├── src/
+│   └── nba_data_forge/
+│       ├── api/                    # FastAPI implementation
+│       │   ├── dependencies/       # Query params and filters
+│       │   ├── models/            # SQLAlchemy models
+│       │   ├── schemas/           # Pydantic schemas
+│       │   ├── services/          # Business logic
+│       │   └── v1/                # API endpoints
+│       ├── common/                # Shared utilities
+│       ├── dashboard/             # Streamlit implementation
+│       └── etl/                   # Data pipeline
+│           ├── extractors/        # Data collection
+│           ├── loaders/           # Database operations
+│           └── transformers/      # Data processing
+├── tests/                         # Integration tests
+└── config/                        # Configuration
+```
+
+## Local Development
+
 ### Prerequisites
 - Python 3.12+
-- Docker & Docker Compose
 - PostgreSQL 16+
+- Docker & Docker Compose
 
-### Configuration
-1. Create PostgreSQL database
-2. Configure `config.ini`:
+### Setup
+
+- Clone repository
 ```
-[postgresql]
-host=localhost
-port=5432
-database=your_database_name
-user=your_username
-password=your_password
+git clone https://github.com/yourusername/nba_data_forge.git
+cd nba_data_forge
 ```
-3. Install dependencies:
+
+- Create virtual environment
+```
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# or
+.\venv\Scripts\activate  # Windows
+```
+
+- Install dependencies
 ```
 pip install -r requirements.txt
 ```
 
-## API Documentation
-Once running, view the interactive API documentation at:
-- Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
+- Configure database
+```
+createdb nba_data
+```
 
-## Next Steps
-### Short Term
-- Expand API analytics capabilities
-- Add advanced statistical analysis
-- Implement incremental periodically updates
-- Enhance data validation and quality checks
+- Update ./config.ini
+```
+[postgresql]
+host=localhost
+port=5432
+database=nba_data_forge
+user=your_username
+password=your_password
+```
 
-### Medium Term
-- Implement caching and query optimization
-- Performance monitoring and tuning
+- Start services
+```
+uvicorn nba_data_forge.api.main:app --reload
+streamlit run nba_data_forge/dashboard/main.py
+```
 
-## Skills Demonstrated
-- ETL pipeline development
-- RESTful API design
-- Database modeling
-- Error handling and recovery
-- Clean code practices
-- Project organization
 
-## Contributing
-This is a portfolio project but suggestions and feedback are welcome. Please feel free to open an issue or submit a pull request.
+## Data Sources & Disclaimer
+
+This project uses publicly available NBA statistics from:
+- [Basketball Reference](https://www.basketball-reference.com/)
+- [basketball_reference_web_scraper](https://jaebradley.github.io/basketball_reference_web_scraper/)
+
+For educational and demonstration purposes only. Not affiliated with or endorsed by the NBA or Basketball Reference.
 
 ## License
-This project is licensed under the MIT License. See the LICENSE file for details.
 
-Note: While this project uses publicly available data, it is important to respect Basketball Reference's terms of service and data usage guidelines when using their data.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
